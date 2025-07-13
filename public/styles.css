@@ -1,0 +1,17 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.table thead th {
+  vertical-align: middle;
+}
+
+.btn:hover {
+  transform: scale(1.02);
+  transition: 0.2s ease-in-out;
+}
+
+input:focus, select:focus {
+  box-shadow: 0 0 5px #0078d7;
+  border-color: #0078d7;
+}

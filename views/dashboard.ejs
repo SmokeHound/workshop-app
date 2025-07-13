@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.4.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="/styles.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+
+  <nav class="navbar navbar-dark bg-dark px-4 mb-4">
+    <span class="navbar-brand mb-0 h1">📋 Dashboard</span>
+    <form method="post" action="/logout" class="d-flex">
+      <button class="btn btn-outline-light btn-sm">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </form>
+  </nav>
+
+  <div class="container">
+    <div class="mb-4">
+      <h3>Hello, <%= user.username %> 👋</h3>
+      <p class="text-muted">Welcome back to your workshop order system</p>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+          <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-list-alt"></i> Total Orders</h5>
+            <p class="card-text fs-4"><%= totalOrders %></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-dollar-sign"></i> Last Order Total</h5>
+            <p class="card-text fs-4">
+              <%= latest ? '$' + latest.total.toFixed(2) : '—' %>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-white bg-secondary mb-3">
+          <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-calendar-day"></i> Last Order Date</h5>
+            <p class="card-text fs-5">
+              <%= latest ? latest.createdAt.toISOString().slice(0,10) : '—' %>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-3">
+      <a href="/order" class="btn btn-outline-primary">
+        <i class="fas fa-plus-circle"></i> New Order
+      </a>
+      <a href="/history" class="btn btn-outline-secondary">
+        <i class="fas fa-history"></i> View History
+      </a>
+      <% if (user.isAdmin) { %>
+        <a href="/admin/users" class="btn btn-outline-danger">
+          <i class="fas fa-users-cog"></i> User Management
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+</body>
+</html>
