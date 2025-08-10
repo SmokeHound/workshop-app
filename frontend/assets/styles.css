@@ -1,0 +1,36 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f7f9fc;
+  color: #333;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+}
+
+.table thead th {
+  vertical-align: middle;
+}
+
+.btn:hover {
+  transform: scale(1.02);
+  transition: 0.2s ease-in-out;
+}
+
+input:focus, select:focus {
+  box-shadow: 0 0 5px #0078d7;
+  border-color: #0078d7;
+}
+
+.line-total {
+  font-weight: bold;
+}
+
+.navbar-brand {
+  font-weight: 500;
+  font-size: 1.2rem;
+}
+
+.card-title {
+  font-weight: 500;
+}
