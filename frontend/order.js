@@ -7,70 +7,83 @@ import {
 
 document.addEventListener('DOMContentLoaded', () => {
   initThemeToggle('themeToggle');
-  const itemList = document.getElementById('itemList');
+
+  const categoryTabs = document.getElementById('categoryTabs');
+  const tabContent = document.getElementById('tabContent');
+  const cartList = document.getElementById('cartList');
+  const submitBtn = document.getElementById('submitOrder');
+  const cart = [];
+
   showSpinner('spinnerContainer');
 
-  fetch('/api/items')
+  fetch('/api/consumables')
     .then(res => res.json())
-    .then(items => {
+    .then(data => {
       hideSpinner('spinnerContainer');
 
-      if (!Array.isArray(items) || items.length === 0) {
-        showToast('No items available.', 'info');
-        return;
-      }
-
-      items.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'col-md-4';
-
-        card.innerHTML = `
-          <div class="card h-100">
-            <div class="card-body">
-              <h5 class="card-title">${item.name}</h5>
-              <p class="card-text">Available: ${item.quantity}</p>
-              <input type="number" min="1" max="${item.quantity}" value="1" class="form-control mb-2" id="qty-${item.id}" />
-              <button class="btn btn-success w-100" data-id="${item.id}" data-name="${item.name}">Add to Order</button>
-            </div>
-          </div>
+      const categories = Object.keys(data);
+      categories.forEach((category, i) => {
+        // Tab button
+        const tab = document.createElement('li');
+        tab.className = 'nav-item';
+        tab.innerHTML = `
+          <button class="nav-link ${i === 0 ? 'active' : ''}" data-bs-toggle="tab" data-bs-target="#tab-${i}">
+            ${category}
+          </button>
         `;
+        categoryTabs.appendChild(tab);
 
-        itemList.appendChild(card);
+        // Tab pane
+        const pane = document.createElement('div');
+        pane.className = `tab-pane fade ${i === 0 ? 'show active' : ''}`;
+        pane.id = `tab-${i}`;
+
+        const table = document.createElement('table');
+        table.className = 'table table-sm';
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Description</th>
+              <th>Qty</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data[category].map(item => `
+              <tr>
+                <td>${item.code}</td>
+                <td>${item.description}</td>
+                <td>
+                  <input type="number" min="1" value="${item.quantity ?? 1}" class="form-control form-control-sm qty-input" data-code="${item.code}" data-desc="${item.description}" />
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-success add-btn" data-code="${item.code}" data-desc="${item.description}">Add</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        `;
+        pane.appendChild(table);
+        tabContent.appendChild(pane);
       });
 
-      itemList.addEventListener('click', async (e) => {
-        if (e.target.tagName === 'BUTTON') {
-          const id = e.target.dataset.id;
-          const name = e.target.dataset.name;
-          const qtyInput = document.getElementById(`qty-${id}`);
-          const quantity = parseInt(qtyInput.value, 10);
+      tabContent.addEventListener('click', (e) => {
+        if (e.target.classList.contains('add-btn')) {
+          const code = e.target.dataset.code;
+          const desc = e.target.dataset.desc;
+          const input = tabContent.querySelector(`.qty-input[data-code="${code}"]`);
+          const quantity = parseInt(input.value, 10);
 
           if (!quantity || quantity < 1) {
             showToast('Invalid quantity.', 'error');
             return;
           }
 
-          showSpinner('spinnerContainer');
-
-          try {
-            const res = await fetch('/api/orders', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ item: name, quantity }),
-            });
-
-            hideSpinner('spinnerContainer');
-
-            if (res.ok) {
-              showToast(`Ordered ${quantity} × ${name}`, 'success');
-              qtyInput.value = 1;
-            } else {
-              showToast('Order failed.', 'error');
-            }
-          } catch {
-            hideSpinner('spinnerContainer');
-            showToast('Network error.', 'error');
-          }
+          cart.push({ code, description: desc, quantity });
+          updateCart();
+          showToast(`Added ${quantity} × ${desc}`, 'success');
+          input.value = 1;
         }
       });
     })
@@ -78,4 +91,56 @@ document.addEventListener('DOMContentLoaded', () => {
       hideSpinner('spinnerContainer');
       showToast('Failed to load items.', 'error');
     });
+
+  function updateCart() {
+    cartList.innerHTML = '';
+    cart.forEach((entry, index) => {
+      const li = document.createElement('li');
+      li.className = 'list-group-item d-flex justify-content-between align-items-center';
+      li.innerHTML = `
+        <span>${entry.code} — ${entry.description} × ${entry.quantity}</span>
+        <button class="btn btn-sm btn-outline-danger" data-index="${index}">Remove</button>
+      `;
+      cartList.appendChild(li);
+    });
+  }
+
+  cartList.addEventListener('click', (e) => {
+    if (e.target.tagName === 'BUTTON') {
+      const index = parseInt(e.target.dataset.index, 10);
+      cart.splice(index, 1);
+      updateCart();
+      showToast('Item removed from cart.', 'info');
+    }
+  });
+
+  submitBtn.addEventListener('click', async () => {
+    if (cart.length === 0) {
+      showToast('Cart is empty.', 'info');
+      return;
+    }
+
+    showSpinner('spinnerContainer');
+
+    try {
+      const res = await fetch('/api/orders/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orders: cart }),
+      });
+
+      hideSpinner('spinnerContainer');
+
+      if (res.ok) {
+        showToast('Order submitted!', 'success');
+        cart.length = 0;
+        updateCart();
+      } else {
+        showToast('Order failed.', 'error');
+      }
+    } catch {
+      hideSpinner('spinnerContainer');
+      showToast('Network error.', 'error');
+    }
+  });
 });
