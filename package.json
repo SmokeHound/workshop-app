@@ -8,10 +8,11 @@
   "version": "1.0.0",
   "description": "Monorepo for Workshop Ordering App",
   "scripts": {
-    "start:backend": "node backend/index.js",
-    "serve:frontend": "serve frontend",
-    "dev": "concurrently \"npm run start:backend\" \"npm run serve:frontend\""
-  },
+  "start:backend": "node backend/index.js",
+  "serve:frontend": "serve frontend",
+  "dev": "concurrently \"npm run start:backend\" \"npm run serve:frontend\"",
+  "build:frontend": "cp shared/config.js frontend/config.js"
+},
   "dependencies": {
     "concurrently": "^8.2.0",
     "serve": "^14.2.0"
