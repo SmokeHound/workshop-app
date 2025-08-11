@@ -2,6 +2,16 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db'); // Assuming you're using a SQLite DB instance
 
+// Rate limiting middleware
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+
+// Apply rate limiter to all routes in this router
+router.use(limiter);
+
 // 🛍 Get all stock items
 router.get('/items', async (req, res) => {
   try {
