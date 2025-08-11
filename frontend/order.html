@@ -20,8 +20,19 @@
 
   <div class="container mt-4">
     <div class="glassy p-4 rounded">
-      <h2 class="mb-4">Available Items</h2>
-      <div id="itemList" class="row g-3"></div>
+      <h2 class="mb-4">Consumables Catalog</h2>
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs" id="categoryTabs"></ul>
+
+      <!-- Tab Content -->
+      <div class="tab-content mt-3" id="tabContent"></div>
+    </div>
+
+    <div class="glassy p-4 rounded mt-4">
+      <h4>🛒 Your Cart</h4>
+      <ul id="cartList" class="list-group mb-3"></ul>
+      <button id="submitOrder" class="btn btn-primary w-100">Submit Order</button>
       <div id="spinnerContainer" class="mt-3"></div>
     </div>
   </div>
