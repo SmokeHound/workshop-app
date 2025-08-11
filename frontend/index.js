@@ -1,0 +1,1 @@
+app.use('/api/consumables', require('./routes/consumables'));
