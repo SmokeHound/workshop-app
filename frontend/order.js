@@ -1,10 +1,11 @@
-import { Modal } from 'bootstrap';
 import {
   showSpinner,
   hideSpinner,
   showToast,
   initThemeToggle
 } from './utils.js';
+
+import { Modal } from 'bootstrap';
 
 document.addEventListener('DOMContentLoaded', () => {
   initThemeToggle('themeToggle');
@@ -13,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabContent = document.getElementById('tabContent');
   const cartList = document.getElementById('cartList');
   const submitBtn = document.getElementById('submitOrder');
+  const confirmList = document.getElementById('confirmList');
+  const confirmSubmit = document.getElementById('confirmSubmit');
   const cart = [];
 
   showSpinner('spinnerContainer');
@@ -115,33 +118,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  submitBtn.addEventListener('click', async () => {
+  submitBtn.addEventListener('click', () => {
     if (cart.length === 0) {
       showToast('Cart is empty.', 'info');
       return;
     }
 
-    showSpinner('spinnerContainer');
+    confirmList.innerHTML = '';
+    cart.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'list-group-item';
+      li.textContent = `${item.code} — ${item.description} × ${item.quantity}`;
+      confirmList.appendChild(li);
+    });
 
-    try {
-      const res = await fetch('/api/orders/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orders: cart }),
-      });
+    const modal = new Modal(document.getElementById('confirmModal'));
+    modal.show();
 
-      hideSpinner('spinnerContainer');
+    confirmSubmit.onclick = async () => {
+      modal.hide();
+      showSpinner('spinnerContainer');
 
-      if (res.ok) {
-        showToast('Order submitted!', 'success');
-        cart.length = 0;
-        updateCart();
-      } else {
-        showToast('Order failed.', 'error');
+      try {
+        const res = await fetch('/api/orders/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orders: cart }),
+        });
+
+        hideSpinner('spinnerContainer');
+
+        if (res.ok) {
+          showToast('Order submitted!', 'success');
+          cart.length = 0;
+          updateCart();
+        } else {
+          showToast('Order failed.', 'error');
+        }
+      } catch {
+        hideSpinner('spinnerContainer');
+        showToast('Network error.', 'error');
       }
-    } catch {
-      hideSpinner('spinnerContainer');
-      showToast('Network error.', 'error');
-    }
+    };
   });
 });
