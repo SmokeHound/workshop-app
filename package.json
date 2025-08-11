@@ -1,7 +1,3 @@
----
-
-### 📦 Root-Level `package.json`
-
 ```json
 {
   "name": "workshop-app",
