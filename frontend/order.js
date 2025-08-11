@@ -1,3 +1,4 @@
+import { Modal } from 'bootstrap';
 import {
   showSpinner,
   hideSpinner,
