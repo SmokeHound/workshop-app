@@ -6,7 +6,7 @@
 
 
 
-This monorepo contains both the frontend and backend for the Workshop Ordering App. It’s designed for modular development, shared configuration, and streamlined deployment.
+This monorepo contains both the frontend, backend and shared modules for the Workshop Ordering App. It’s designed for modular development, shared configuration, and streamlined deployment.
 
 ---
 
