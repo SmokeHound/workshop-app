@@ -1,36 +1,17 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary px-3 mb-4">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="index.html">Workshop App</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navMenu"
-      aria-controls="navMenu"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navMenu">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="order.html">Place Order</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="history.html">Order History</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="item-admin.html">Item Admin</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="login.html">Login</a>
-        </li>
-      </ul>
-      <button id="themeToggle" class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-moon"></i>
-      </button>
-    </div>
-  </div>
-</nav>
+<div class="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary sidebar" style="width: 250px; height: 100vh; position: fixed;">
+  <a href="index.html" class="d-flex align-items-center mb-3 link-dark text-decoration-none">
+    <span class="fs-4">🛠 Workshop App</span>
+  </a>
+  <hr>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li><a href="index.html" class="nav-link" data-page="index.html"><i class="bi bi-house-door"></i> Home</a></li>
+    <li><a href="order.html" class="nav-link" data-page="order.html"><i class="bi bi-box-seam"></i> Place Order</a></li>
+    <li><a href="history.html" class="nav-link" data-page="history.html"><i class="bi bi-clock-history"></i> Order History</a></li>
+    <li><a href="item-admin.html" class="nav-link" data-page="item-admin.html"><i class="bi bi-tools"></i> Item Admin</a></li>
+    <li><a href="login.html" class="nav-link" data-page="login.html"><i class="bi bi-person-lock"></i> Login</a></li>
+  </ul>
+  <hr>
+  <button id="themeToggle" class="btn btn-sm btn-outline-secondary w-100 mt-auto">
+    <i class="bi bi-moon"></i> Toggle Theme
+  </button>
+</div>
