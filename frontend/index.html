@@ -7,23 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary px-3 mb-4">
-    <a class="navbar-brand" href="index.html">Workshop App</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navMenu">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="order.html">Place Order</a></li>
-        <li class="nav-item"><a class="nav-link" href="history.html">Order History</a></li>
-        <li class="nav-item"><a class="nav-link" href="item-admin.html">Item Admin</a></li>
-        <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
-      </ul>
-      <button id="themeToggle" class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-moon"></i>
-      </button>
-    </div>
-  </nav>
+  <div id="navContainer"></div>
 
   <div class="container">
     <h1>Welcome to the Workshop App</h1>
@@ -32,9 +16,13 @@
 
   <script type="module">
     import { initThemeToggle } from './utils.js';
-    document.addEventListener('DOMContentLoaded', () => {
+    async function loadNav() {
+      const res = await fetch('nav.html');
+      const html = await res.text();
+      document.getElementById('navContainer').innerHTML = html;
       initThemeToggle('themeToggle');
-    });
+    }
+    document.addEventListener('DOMContentLoaded', loadNav);
   </script>
 </body>
 </html>
