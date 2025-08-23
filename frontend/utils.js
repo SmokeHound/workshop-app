@@ -72,7 +72,3 @@ function updateGlassyEffects(theme) {
     el.style.transition = 'background-color 0.3s ease';
   });
 }
-export function initThemeToggle(id) {
-  // Placeholder for theme toggle logic
-  console.log(`Theme toggle initialized for #${id}`);
-}
