@@ -1,10 +1,10 @@
 # 🛠 Workshop App -- Monorepo
 
-![Netlify Status](https://api.netlify.com/api/v1/badges/f4beb07d-7307-436f-879a-d9a8167934dd/deploy-status)](https://app.netlify.com/projects/workshop-order/deploys)
+![Netlify Status](https://api.netlify.com/api/v1/badges/f4beb07d-7307-436f-879a-d9a8167934dd/deploy-status)]
 ![GitHub last commit](https://img.shields.io/github/last-commit/SmokeHound/workshop-app)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/SmokeHound/workshop-app?label=CodeRabbit+Reviews)
 
-This monorepo contains the frontend, backend, and shared modules for the Workshop Ordering App. It’s designed for modular development, shared configuration, and streamlined deployment. The app enables users to order workshop consumables, view history, and allows admins to manage inventory.
+This monorepo contains the frontend, backend, and shared modules for the Workshop App. It’s designed for modular development, shared configuration, and streamlined deployment. The app enables users to order workshop consumables, view history, and allows admins to manage inventory.
 
 ---
 
@@ -39,7 +39,7 @@ workshop-app/
 - **Frontend:** HTML, CSS, JavaScript (Vanilla)
 - **Backend:** Node.js, Express, SQLite
 - **Auth:** JWT, bcrypt
-- **DevOps:** Netlify (frontend), Render/other (backend), GitHub Actions (CI)
+- **DevOps:** Netlify (frontend), Render (backend), GitHub Actions (CI)
 - **Testing:** Jest, Supertest
 
 ---
@@ -141,18 +141,6 @@ The app uses a reusable layout system for consistent headers, footers, and conte
 
 ---
 
-## 🧪 Testing
-
-- Backend: `npm test` (Jest + Supertest)
-- Pre-commit hooks: ESLint, Prettier, lint-staged
-- Minimum 70% coverage required for PRs
-
----
-
 ## 💬 Contact
 
 For questions, reach out via GitHub issues or pull requests.
-
----
-
-Please let me know if you need any tweaks or additional sections!
