@@ -1,7 +1,7 @@
 # 🛠 Workshop App -- Monorepo
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/f4beb07e-7307-436f-879a-d9a8167934dd/deploy-status)](https://app.netlify.com/projects/workshop-order/deploys)  
-![GitHub last commit](https://img.shields.io/github/last-commit/SmokeHound/workshop-app)  
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f4beb07c-7307-436f-879a-d9a8167934dd/deploy-status)](https://app.netlify.com/projects/workshop-order/deploys)
+![GitHub last commit](https://img.shields.io/github/last-commit/SmokeHound/workshop-app)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/SmokeHound/workshop-app?label=CodeRabbit+Reviews)
 
 This monorepo contains the frontend, backend, and shared modules for the Workshop Ordering App. It’s designed for modular development, shared configuration, and streamlined deployment. The app enables users to order workshop consumables, view history, and allows admins to manage inventory.
@@ -78,9 +78,9 @@ Update any API endpoint URLs in `shared/config.js` if needed.
 
 ## 📄 Usage
 
-- Visit the frontend app (e.g. [https://workshop.joshburt.com.au](https://workshop.joshburt.com.au))  
-- Login with appropriate role credentials  
-- Submit orders, view history, or manage items (admin)  
+- Visit the frontend app (e.g. [https://workshop.joshburt.com.au](https://workshop.joshburt.com.au))
+- Login with appropriate role credentials
+- Submit orders, view history, or manage items (admin)
 - Theme and preferences stored in `localStorage`
 
 ---
@@ -108,10 +108,9 @@ Local: `http://localhost:3000/api`
 | GET    | `/health`            | Health check                   |
 | GET    | `/consumables`       | Static consumables list        |
 
-### Authentication
-
+**Authentication:**  
 - Login returns JWT, use as Bearer token  
-- Some endpoints (item management, history) require admin role  
+- Some endpoints (item management, history) require admin role
 
 ### Example: Get Items
 
@@ -144,8 +143,8 @@ The app uses a reusable layout system for consistent headers, footers, and conte
 
 ## 🧪 Testing
 
-- Backend: `npm test` (Jest + Supertest)  
-- Pre-commit hooks: ESLint, Prettier, lint-staged  
+- Backend: `npm test` (Jest + Supertest)
+- Pre-commit hooks: ESLint, Prettier, lint-staged
 - Minimum 70% coverage required for PRs
 
 ---
@@ -156,4 +155,4 @@ For questions, reach out via GitHub issues or pull requests.
 
 ---
 
-I welcome any feedback or suggestions for improvements and additional sections.
+Please let me know if you need any tweaks or additional sections!
