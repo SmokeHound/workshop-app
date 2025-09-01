@@ -1,6 +1,6 @@
 # 🛠 Workshop App -- Monorepo
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/f4beb07c-7307-436f-879a-d9a8167934dd/deploy-status)](https://app.netlify.com/projects/workshop-order/deploys)
+![Netlify Status](https://api.netlify.com/api/v1/badges/f4beb07d-7307-436f-879a-d9a8167934dd/deploy-status)](https://app.netlify.com/projects/workshop-order/deploys)
 ![GitHub last commit](https://img.shields.io/github/last-commit/SmokeHound/workshop-app)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/SmokeHound/workshop-app?label=CodeRabbit+Reviews)
 
