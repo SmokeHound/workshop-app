@@ -50,9 +50,8 @@ workshop-app/
 
 ### Prerequisites
 
-- Node.js (v18+ recommended)
+- Node.js (22.x LTS recommended; 20.x LTS supported)
 - npm
-
 ### Backend
 
 ```bash
