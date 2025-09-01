@@ -8,15 +8,15 @@ Express + SQLite backend API for managing workshop consumables and orders. Built
 
 \## ✨ Features
 
-\- `POST /api/login`
+\- `POST /login`
 
-\- `POST /api/save-order`
+\- `POST /save-order`
 
-\- `GET /api/items`
+\- `GET /items`
 
-\- `GET /api/history`
+\- `GET /history`
 
-\- `GET /api/stats`
+\- `GET /stats`
 
 
 
@@ -29,6 +29,7 @@ Express + SQLite backend API for managing workshop consumables and orders. Built
 npm install
 
 node index.js
+
 
 
 
