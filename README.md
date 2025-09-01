@@ -1,8 +1,6 @@
-
-
 # 🛠 Workshop App -- Monorepo
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/f4beb07d-7307-436f-879a-d9a8167934dd/deploy-status)](https://app.netlify.com/projects/workshop-order/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f4beb07c-7307-436f-879a-d9a8167934dd/deploy-status)](https://app.netlify.com/projects/workshop-order/deploys)
 ![GitHub last commit](https://img.shields.io/github/last-commit/SmokeHound/workshop-app)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/SmokeHound/workshop-app?label=CodeRabbit+Reviews)
 
@@ -52,6 +50,7 @@ workshop-app/
 
 - Node.js (22.x LTS recommended; 20.x LTS supported)
 - npm
+
 ### Backend
 
 ```bash
@@ -78,7 +77,7 @@ Update any API endpoint URLs in `shared/config.js` if needed.
 
 ## 📄 Usage
 
-- Visit the frontend app (e.g. https://workshop.joshburt.com.au)
+- Visit the frontend app (e.g. [https://workshop.joshburt.com.au](https://workshop.joshburt.com.au))
 - Login with appropriate role credentials
 - Submit orders, view history, or manage items (admin)
 - Theme and preferences stored in `localStorage`
@@ -109,10 +108,11 @@ Local: `http://localhost:3000/api`
 | GET    | `/consumables`       | Static consumables list        |
 
 **Authentication:**  
-- Login returns JWT, use as Bearer token
+- Login returns JWT, use as Bearer token  
 - Some endpoints (item management, history) require admin role
 
-**Example: Get Items**
+### Example: Get Items
+
 ```http
 GET /api/items
 Response: [
@@ -121,7 +121,8 @@ Response: [
 ]
 ```
 
-**Example: Add Item**
+### Example: Add Item
+
 ```http
 POST /api/items
 Body: { "name": "Gloves", "quantity": 50, "price": 1.50 }
@@ -133,16 +134,16 @@ Response: { "message": "Item added successfully" }
 ## 🎨 Layout System
 
 The app uses a reusable layout system for consistent headers, footers, and content areas across pages.  
-- CSS variables for themes
-- Modular page scripts for easy expansion (dashboard, analytics, etc.)
-- See `frontend/utils.js` and `styles.css` for details
+- CSS variables for themes  
+- Modular page scripts for easy expansion (dashboard, analytics, etc.)  
+- See `frontend/utils.js` and `frontend/assets/styles.css` for details
 
 ---
 
 ## 🧪 Testing
 
-- Backend: `npm test` (Jest + Supertest)
-- Pre-commit hooks: ESLint, Prettier, lint-staged
+- Backend: `npm test` (Jest + Supertest)  
+- Pre-commit hooks: ESLint, Prettier, lint-staged  
 - Minimum 70% coverage required for PRs
 
 ---
@@ -153,4 +154,4 @@ For questions, reach out via GitHub issues or pull requests.
 
 ---
 
-Let me know if you need any tweaks or additional sections!
+Please let me know if you need any tweaks or additional sections.
