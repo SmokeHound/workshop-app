@@ -67,3 +67,4 @@ router.get('/me', authMiddleware, (req, res) => {
 });
 
 module.exports = router;
+module.exports.authMiddleware = authMiddleware;
