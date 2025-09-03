@@ -31,9 +31,21 @@ function authMiddleware(req, res, next) {
   });
 }
 
+const rateLimit = require('express-rate-limit');
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 // POST /api/login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { username, password } = req.body;
+  if (typeof username !== 'string' || typeof password !== 'string' || !username || !password) {
+    return res.status(400).json({ error: 'username and password are required' });
+  }
+
   const user = users.find(u => u.username === username);
   if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
