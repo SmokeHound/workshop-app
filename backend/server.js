@@ -1,0 +1,1 @@
+app.use('/api', require('./routes/auth'));
