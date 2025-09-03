@@ -18,9 +18,12 @@ const users = [
 
 // Middleware to verify JWT
 function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.sendStatus(401);
-  const token = authHeader.split(' ')[1];
+  const authHeader = req.headers.authorization || '';
+  const [scheme, token] = authHeader.split(' ');
+  if (scheme !== 'Bearer' || !token) return res.sendStatus(401);
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({ error: 'Server misconfigured: missing JWT_SECRET' });
+  }
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
     req.user = user;
