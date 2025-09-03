@@ -7,7 +7,11 @@ const router = express.Router();
 const users = [
   {
     username: 'admin',
-    passwordHash: '$2b$10$abc123...replace_with_real_hash...',
+    // Derive once at boot for dev; replace with DB lookups in prod.
+    passwordHash: require('bcrypt').hashSync(
+      process.env.DEV_ADMIN_PASSWORD || 'admin123',
+      10
+    ),
     role: 'admin'
   }
 ];
