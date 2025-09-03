@@ -4,11 +4,14 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 // Example user store (replace with DB)
+if (process.env.NODE_ENV !== 'development' && !process.env.DEV_ADMIN_PASSWORD) {
+  throw new Error('DEV_ADMIN_PASSWORD is required outside development');
+}
 const users = [
   {
     username: 'admin',
     // Derive once at boot for dev; replace with DB lookups in prod.
-    passwordHash: require('bcrypt').hashSync(
+    passwordHash: bcrypt.hashSync(
       process.env.DEV_ADMIN_PASSWORD || 'admin123',
       10
     ),
