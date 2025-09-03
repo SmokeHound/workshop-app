@@ -61,21 +61,14 @@ This plan addresses critical issues found during the full-repo review and define
   - Acceptance:
     - Uncaught route errors return consistent JSON and are logged with request context.
 
-- B. Test suite
-  - Deliverables:
-    - Jest + Supertest configured in backend.
-    - Minimum 10 API tests (auth, CRUD flows, validation failures).
-  - Acceptance:
-    - CI passes tests; coverage >= 70% lines backend.
-
-- C. Linting/formatting & pre-commit
+- B. Linting/formatting & pre-commit
   - Deliverables:
     - ESLint + Prettier config.
     - Husky + lint-staged pre-commit hooks.
   - Acceptance:
     - npm run lint and npm run format succeed; pre-commit enforces staged checks.
 
-- D. Health checks and rate-limiting
+- C. Health checks and rate-limiting
   - Deliverables:
     - GET /health (returns {status:"ok"}).
     - Ensure express-rate-limit is enabled on write routes.
