@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const { authMiddleware } = require('./auth'); // export it from auth.js if you want protection
+const { authMiddleware } = require('./auth');
 
 const rateLimit = require('express-rate-limit');
 const bulkLimiter = rateLimit({
@@ -12,38 +12,23 @@ const bulkLimiter = rateLimit({
 });
 
 // POST /api/orders/bulk
-router.post(
-  '/bulk',
-  authMiddleware,
-  bulkLimiter,
-  async (req, res) => {
-    const orders = req.body.orders;
-    if (
-      !Array.isArray(orders) ||
-      orders.length === 0 ||
-      orders.length > 500
-    ) {
-      return res.status(400).json({ error: 'Invalid order list' });
-    }
-
-    for (const o of orders) {
-      const { code, description, quantity } = o || {};
-      if (
-        typeof code !== 'string'    || !code.trim() ||
-        typeof description !== 'string' || !description.trim() ||
-        !Number.isInteger(quantity) || quantity <= 0
-      ) {
-        return res.status(400).json({ error: 'Invalid order item' });
-      }
-    }
-
-    // ...rest of handler...
-  }
-);
+router.post('/bulk', authMiddleware, bulkLimiter, async (req, res) => {
   const orders = req.body.orders;
-  if (!Array.isArray(orders) || orders.length === 0) {
+  if (!Array.isArray(orders) || orders.length === 0 || orders.length > 500) {
     return res.status(400).json({ error: 'Invalid order list' });
   }
+
+  for (const o of orders) {
+    const { code, description, quantity } = o || {};
+    if (
+      typeof code !== 'string' || !code.trim() ||
+      typeof description !== 'string' || !description.trim() ||
+      !Number.isInteger(quantity) || quantity <= 0
+    ) {
+      return res.status(400).json({ error: 'Invalid order item' });
+    }
+  }
+
   try {
     for (const { code, description, quantity } of orders) {
       await db.run(
