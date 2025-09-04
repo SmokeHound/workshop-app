@@ -19,7 +19,20 @@ const users = [
   }
 ];
 
-// Middleware to verify JWT
+/**
+ * Express middleware that verifies a Bearer JWT from the Authorization header.
+ *
+ * Checks for a "Bearer <token>" authorization header and verifies the token using
+ * process.env.JWT_SECRET. On success the decoded token payload is attached to
+ * req.user and next() is called.
+ *
+ * Behavior:
+ * - Responds 401 if the header is missing or not a Bearer token.
+ * - Responds 500 with a JSON error if JWT_SECRET is not configured.
+ * - Responds 403 if token verification fails.
+ *
+ * Side effect: sets req.user to the decoded JWT payload on successful verification.
+ */
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization || '';
   const [scheme, token] = authHeader.split(' ');
