@@ -1,8 +1,19 @@
 const tbody = document.querySelector('#order-table tbody');
 const grandTotalEl = document.getElementById('grand-total');
-let catalog = [];
 
-fetch("https://workshop-backend.joshburt.com.au/api/items")
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
+
+// Fetch items function
+async function fetchItems() {
+    const res = await fetch(`${API_BASE_URL}/items`, {
+        headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) throw new Error(`Items fetch failed: ${res.status}`);
+    return res.json();
+}
+
+// Export functions
+export { fetchItems, saveOrder };
   .then(r => r.json())
   .then(data => catalog = data);
 
@@ -70,7 +81,10 @@ document.getElementById('save-order').onclick = () => {
   });
   const total = +grandTotalEl.textContent;
 
-  fetch("https://workshop-backend.joshburt.com.au/api/save-order", {
+  // Save order function
+async function saveOrder(order) {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
+    return await response.json();}
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ items, total })
@@ -79,4 +93,6 @@ document.getElementById('save-order').onclick = () => {
   .then(o => alert(`Saved as Order #${o.orderId}`))
   .catch(() => alert('Save failed.'));
 };
+
+
 
