@@ -2,7 +2,7 @@ const tbody = document.querySelector('#order-table tbody');
 const grandTotalEl = document.getElementById('grand-total');
 let catalog = [];
 
-fetch("https://workshop-backend.joshburt.com.au/api/items")
+fetch(\${API_BASE_URL}/items`)
   .then(r => r.json())
   .then(data => catalog = data);
 
@@ -79,4 +79,5 @@ document.getElementById('save-order').onclick = () => {
   .then(o => alert(`Saved as Order #${o.orderId}`))
   .catch(() => alert('Save failed.'));
 };
+
 
