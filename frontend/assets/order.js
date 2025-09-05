@@ -2,7 +2,7 @@ const tbody = document.querySelector('#order-table tbody');
 const grandTotalEl = document.getElementById('grand-total');
 let catalog = [];
 
-fetch("https://workshop-order.onrender.com/api/items")
+fetch("https://workshop-backend.joshburt.com.au/api/items")
   .then(r => r.json())
   .then(data => catalog = data);
 
@@ -70,7 +70,7 @@ document.getElementById('save-order').onclick = () => {
   });
   const total = +grandTotalEl.textContent;
 
-  fetch("https://workshop-order.onrender.com/api/save-order", {
+  fetch("https://workshop-backend.joshburt.com.au/api/save-order", {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ items, total })
@@ -79,3 +79,4 @@ document.getElementById('save-order').onclick = () => {
   .then(o => alert(`Saved as Order #${o.orderId}`))
   .catch(() => alert('Save failed.'));
 };
+
