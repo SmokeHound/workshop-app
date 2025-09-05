@@ -5,8 +5,11 @@ const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
 
 // Fetch items function
 async function fetchItems() {
-    const response = await fetch(`${API_BASE_URL}/items`);
-    return await response.json();
+    const res = await fetch(`${API_BASE_URL}/items`, {
+        headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) throw new Error(`Items fetch failed: ${res.status}`);
+    return res.json();
 }
 
 // Export functions
