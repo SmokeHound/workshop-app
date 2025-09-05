@@ -1,6 +1,5 @@
 const tbody = document.querySelector('#order-table tbody');
 const grandTotalEl = document.getElementById('grand-total');
-let catalog = [];
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
 
