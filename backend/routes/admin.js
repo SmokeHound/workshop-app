@@ -68,9 +68,15 @@ router.post('/users/import', async (req, res) => {
 // --- Role-Based Access Control ---
 router.get('/roles', async (req, res) => {
   try {
-    const rows = await db.all('SELECT * FROM roles');
+    const rows = await db.all('SELECT role, permissions FROM roles');
     const roles = {};
-    rows.forEach(r => { roles[r.role] = JSON.parse(r.permissions); });
+    for (const r of rows) {
+      try {
+        roles[r.role] = r.permissions ? JSON.parse(r.permissions) : [];
+      } catch {
+        roles[r.role] = [];
+      }
+    }
     res.json(roles);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch roles' });
