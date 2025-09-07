@@ -1,6 +1,11 @@
 // Admin Tools JS
 // Handles bulk import/export, role access, logs, announcements, sessions, API keys, backup/restore
-import { API_BASE, fetchWithError } from './utils.js';
+// frontend/admin-tools.js
+
+import { fetchWithError } from './utils.js';
+import { API_BASE_URL } from './shared/config.js';
+
+// …rest of file remains unchanged
 
 // Example: Load announcements
 export async function loadAnnouncements() {
