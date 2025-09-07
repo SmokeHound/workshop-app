@@ -196,20 +196,34 @@ document.getElementById('save-order').onclick = async () => {
 
 }; // <-- Close the onclick handler function
 
-// Save order function
-export async function saveOrder(items, total) {
+  // Save order function
+async function saveOrder(order) {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
+    return await response.json();}
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items, total })
+  })
+  .then(r => r.json())
+  .then(o => alert(`Saved as Order #${o.orderId}`))
+  .catch(() => alert('Save failed.'));
   try {
-    const response = await fetch(`${getApiBase()}/orders`, {
+    showLoading(true);
+    const r = await fetch(`${API_BASE_URL}/save-order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items, total })
     });
-    if (!response.ok) throw new Error('Save failed');
-    const order = await response.json();
-    alert(`Saved as Order #${order.orderId}`);
-    return order;
-  } catch (err) {
-    alert('Save failed.');
-    throw err;
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const o = await r.json();
+    if (!o.orderId) throw new Error('Invalid response from server');
+    alert(`Saved as Order #${o.orderId}`);
+    showLoading(false);
+  } catch (e) {
+    showLoading(false);
+    showError('Save failed.');
   }
-}
+};
+
+// Public API
+export { fetchItems, saveOrder };
