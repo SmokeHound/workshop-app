@@ -20,6 +20,7 @@ app.use(express.json({ limit: '200kb' }));
 app.use('/api', require('./routes/auth'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/consumables', require('./routes/consumables'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Start server
 const PORT = process.env.PORT || 3000;

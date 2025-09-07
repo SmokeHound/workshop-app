@@ -31,25 +31,37 @@
     <div id="result" class="mt-3 text-success fw-bold" style="display:none;"></div>
   </div>
 
-  <script>
-    document.getElementById('item-form').onsubmit = e => {
+  <script type="module">
+    // Import shared API base and toast utility
+    import { showToast } from './utils.js';
+    import { API_BASE_URL } from '../shared/config.js';
+
+    // Handle form submission
+    document.getElementById('item-form').onsubmit = async e => {
       e.preventDefault();
       const name = document.getElementById('name').value.trim();
       const price = parseFloat(document.getElementById('price').value);
-
-      fetch("https://workshop-order.onrender.com/api/items", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, price })
-      }).then(r => {
+      if (!name || !Number.isFinite(price) || price < 0) {
+        showToast('Invalid item name or price.', 'error');
+        return;
+      }
+      try {
+        const r = await fetch(`${API_BASE_URL}/items`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, price })
+        });
         if (r.ok) {
           document.getElementById('result').textContent = `${name} added for $${price.toFixed(2)}!`;
           document.getElementById('result').style.display = 'block';
           document.getElementById('item-form').reset();
+          showToast('Item added!', 'success');
         } else {
-          alert('Failed to add item');
+          showToast('Failed to add item.', 'error');
         }
-      });
+      } catch {
+        showToast('Network error.', 'error');
+      }
     };
   </script>
 </body>

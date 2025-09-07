@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="assets/styles.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+  <main class="container" style="margin-left: 270px; padding-top: 20px; max-width: 800px;">
+    <h1>User Management</h1>
+    <div class="mb-4">
+      <form id="add-user-form" class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" id="username" class="form-control" required />
+        </div>
+        <div class="col-md-4">
+          <label for="role" class="form-label">Role</label>
+          <select id="role" class="form-select">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+            <option value="tech">Tech</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-success" type="submit">Add User</button>
+        </div>
+      </form>
+    </div>
+    <div class="mb-3">
+      <input type="text" id="searchUser" class="form-control" placeholder="Search users by name or role..." />
+    </div>
+    <div id="user-list-container">
+      <h2 class="h5">Existing Users</h2>
+      <div id="user-list" class="list-group"></div>
+      <nav>
+        <ul class="pagination justify-content-center mt-3" id="user-pagination"></ul>
+      </nav>
+    </div>
+    <div id="user-result" class="mt-3 text-success fw-bold" style="display:none;"></div>
+    <div id="audit-log-container" class="mt-4">
+      <h2 class="h6">Audit Log</h2>
+      <ul id="audit-log" class="list-group"></ul>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module">
+    import { showToast } from './utils.js';
+    import { API_BASE_URL } from '../shared/config.js';
+    // Load nav
+    async function loadNav() {
+      const res = await fetch('nav.html');
+      const html = await res.text();
+      document.getElementById('nav-placeholder').innerHTML = html;
+    }
+    document.addEventListener('DOMContentLoaded', loadNav);
+    // Fetch and render users
+    // Pagination, filtering, and status
+    let allUsers = [];
+    let currentPage = 1;
+    const pageSize = 10;
+    async function loadUsers() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/users/export`);
+        allUsers = await res.json();
+        renderUsers();
+      } catch {
+        showToast('Failed to load users.', 'error');
+      }
+    }
+    function renderUsers() {
+      const userList = document.getElementById('user-list');
+      const pagination = document.getElementById('user-pagination');
+      const searchVal = document.getElementById('searchUser').value.toLowerCase();
+      let filtered = allUsers.filter(u =>
+        u.username.toLowerCase().includes(searchVal) ||
+        u.role.toLowerCase().includes(searchVal)
+      );
+      const totalPages = Math.ceil(filtered.length / pageSize);
+      if (currentPage > totalPages) currentPage = totalPages || 1;
+      const start = (currentPage - 1) * pageSize;
+      const pageUsers = filtered.slice(start, start + pageSize);
+      userList.innerHTML = '';
+      pageUsers.forEach(user => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item d-flex flex-wrap justify-content-between align-items-center';
+        item.innerHTML = `
+          <span>
+            <strong>${user.username}</strong>
+            <span class="badge bg-secondary ms-2">${user.role}</span>
+            <span class="badge ${user.active ? 'bg-success' : 'bg-warning'} ms-2">${user.active ? 'Active' : 'Inactive'}</span>
+          </span>
+          <div class="btn-group">
+            <select class="form-select form-select-sm me-2 change-role" data-username="${user.username}">
+              <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
+              <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+              <option value="tech" ${user.role === 'tech' ? 'selected' : ''}>Tech</option>
+            </select>
+            <button class="btn btn-sm btn-outline-secondary me-2 reset-pw" data-username="${user.username}">Reset PW</button>
+            <button class="btn btn-sm btn-outline-warning me-2 toggle-status" data-username="${user.username}">${user.active ? 'Disable' : 'Enable'}</button>
+            <button class="btn btn-sm btn-danger" data-username="${user.username}">Remove</button>
+          </div>
+        `;
+        userList.appendChild(item);
+      });
+      // Pagination controls
+      pagination.innerHTML = '';
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = 'page-item' + (i === currentPage ? ' active' : '');
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        li.onclick = e => { e.preventDefault(); currentPage = i; renderUsers(); };
+        pagination.appendChild(li);
+      }
+    }
+    document.getElementById('searchUser').oninput = () => { currentPage = 1; renderUsers(); };
+    loadUsers();
+    // Add user
+    document.getElementById('add-user-form').onsubmit = async e => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const role = document.getElementById('role').value;
+      if (!username) {
+        showToast('Username required.', 'error');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE_URL}/users`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, role })
+        });
+        if (res.ok) {
+          showToast('User added!', 'success');
+          document.getElementById('add-user-form').reset();
+          loadUsers();
+          addAuditLog(`Added user ${username} (${role})`);
+        } else {
+          showToast('Failed to add user.', 'error');
+        }
+      } catch {
+        showToast('Network error.', 'error');
+      }
+    };
+    // User actions: remove, change role, reset pw, toggle status
+    document.getElementById('user-list').onclick = async e => {
+      const username = e.target.getAttribute('data-username');
+      if (e.target.classList.contains('btn-danger')) {
+        if (!confirm(`Remove user ${username}?`)) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(username)}`, {
+            method: 'DELETE'
+          });
+          if (res.ok) {
+            showToast('User removed.', 'success');
+            loadUsers();
+            addAuditLog(`Removed user ${username}`);
+          } else {
+            showToast('Failed to remove user.', 'error');
+          }
+        } catch {
+          showToast('Network error.', 'error');
+        }
+      }
+      if (e.target.classList.contains('reset-pw')) {
+        if (!confirm(`Reset password for ${username}?`)) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(username)}/reset-password`, {
+            method: 'POST'
+          });
+          if (res.ok) {
+            showToast('Password reset.', 'success');
+            addAuditLog(`Reset password for ${username}`);
+          } else {
+            showToast('Failed to reset password.', 'error');
+          }
+        } catch {
+          showToast('Network error.', 'error');
+        }
+      }
+      if (e.target.classList.contains('toggle-status')) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(username)}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ toggle: true })
+          });
+          if (res.ok) {
+            showToast('User status updated.', 'success');
+            loadUsers();
+            addAuditLog(`Toggled status for ${username}`);
+          } else {
+            showToast('Failed to update status.', 'error');
+          }
+        } catch {
+          showToast('Network error.', 'error');
+        }
+      }
+    };
+    // Change role
+    document.getElementById('user-list').onchange = async e => {
+      if (e.target.classList.contains('change-role')) {
+        const username = e.target.getAttribute('data-username');
+        const newRole = e.target.value;
+        try {
+          const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(username)}/role`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: newRole })
+          });
+          if (res.ok) {
+            showToast('Role updated.', 'success');
+            loadUsers();
+            addAuditLog(`Changed role for ${username} to ${newRole}`);
+          } else {
+            showToast('Failed to update role.', 'error');
+          }
+        } catch {
+          showToast('Network error.', 'error');
+        }
+      }
+    };
+    // Audit log
+    function addAuditLog(msg) {
+      const log = document.getElementById('audit-log');
+      const item = document.createElement('li');
+      item.className = 'list-group-item';
+      item.textContent = `${new Date().toLocaleString()}: ${msg}`;
+      log.prepend(item);
+      // Keep only last 20 logs
+      while (log.children.length > 20) log.removeChild(log.lastChild);
+    }
+  </script>
+</body>
+</html>

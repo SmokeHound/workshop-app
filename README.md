@@ -26,6 +26,10 @@ workshop-app/
 - Role-based authentication (Admin, User, Tech)
 - Secure inventory management (CRUD)
 - Workshop order submission & history
+- Site-wide settings (theme, API base, notifications, accessibility)
+- User management (CRUD, roles, password reset, audit log)
+- Admin tools (bulk import/export, logs, announcements, sessions, API keys, backup/restore)
+- Persistent backend with SQLite for all admin features
 - Light/dark/high-contrast theme support
 - Real-time feedback with spinners & toasts
 - Centralized error handling & logging
@@ -34,10 +38,11 @@ workshop-app/
 
 ---
 
-## 🏗 Technology Stack
+## 🏗️ Technology Stack
 
 - **Frontend:** HTML, CSS, JavaScript (Vanilla)
 - **Backend:** Node.js, Express, SQLite
+- **Admin/Settings:** Modular JS, persistent API endpoints
 - **Auth:** JWT, bcrypt
 - **DevOps:** Netlify (frontend), Render (backend), GitHub Actions (CI)
 - **Testing:** Jest, Supertest
