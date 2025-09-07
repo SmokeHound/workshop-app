@@ -1,7 +1,11 @@
 const tbody = document.querySelector('#order-table tbody');
 const grandTotalEl = document.getElementById('grand-total');
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
+// runtime‐safe API base URL for browser environments
+const API_BASE_URL =
+  (typeof window !== 'undefined' && window.API_BASE_URL)
+    ? window.API_BASE_URL
+    : '/api';
 
 // Fetch items function
 async function fetchItems() {
