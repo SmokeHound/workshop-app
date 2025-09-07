@@ -7,7 +7,7 @@ const path = require('path');
 // --- Bulk Import/Export Users ---
 router.get('/users/export', async (req, res) => {
   try {
-    const users = await db.all('SELECT * FROM users');
+    const users = await db.all('SELECT username, role, active FROM users');
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: 'Failed to export users' });
