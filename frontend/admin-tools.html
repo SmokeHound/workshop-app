@@ -114,13 +114,42 @@
       const roles = Object.keys(rolesObj);
       const pages = ['Home', 'Order', 'History', 'Item Admin', 'User Management', 'Admin Tools'];
       const container = document.getElementById('role-access-list');
-      container.innerHTML = '<table class="table table-bordered"><thead><tr><th>Role</th>' +
-        pages.map(p => `<th>${p}</th>`).join('') + '</tr></thead><tbody>' +
-        roles.map(role => `<tr><td>${role}</td>` +
-          pages.map(page => {
-  const checked = rolesObj[role].includes('*') || rolesObj[role].includes(page) ? 'checked' : '';
-  return `<td><input type="checkbox" ${checked} data-role="${role}" data-page="${page}"></td>`;
-}).join('')
+      container.textContent = '';
+      const table = document.createElement('table');
+      table.className = 'table table-bordered';
+      const thead = document.createElement('thead');
+      const trHead = document.createElement('tr');
+      const thRole = document.createElement('th');
+      thRole.textContent = 'Role';
+      trHead.appendChild(thRole);
+      pages.forEach(p => {
+        const th = document.createElement('th');
+        th.textContent = p;
+        trHead.appendChild(th);
+      });
+      thead.appendChild(trHead);
+      table.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      roles.forEach(role => {
+        const tr = document.createElement('tr');
+        const tdRole = document.createElement('td');
+        tdRole.textContent = role;
+        tr.appendChild(tdRole);
+        pages.forEach(page => {
+          const td = document.createElement('td');
+          const checked = rolesObj[role].includes('*') || rolesObj[role].includes(page);
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          if (checked) input.checked = true;
+          input.setAttribute('data-role', role);
+          input.setAttribute('data-page', page);
+          td.appendChild(input);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
       container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         cb.onchange = async () => {
           // Collect new roles
@@ -154,13 +183,20 @@
     async function loadAnnouncements() {
       const res = await fetch(`${API_BASE_URL}/admin/announcements`);
       const list = document.getElementById('announcement-list');
-      list.innerHTML = '';
+      list.textContent = '';
       if (!res.ok) return;
       const anns = await res.json();
       anns.forEach(a => {
         const item = document.createElement('li');
         item.className = 'list-group-item d-flex justify-content-between';
-        item.innerHTML = `<span>${a.text}</span><button class="btn btn-sm btn-danger" data-ts="${a.ts}">Remove</button>`;
+        const span = document.createElement('span');
+        span.textContent = a.text;
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-danger';
+        btn.setAttribute('data-ts', a.ts);
+        btn.textContent = 'Remove';
+        item.appendChild(span);
+        item.appendChild(btn);
         list.appendChild(item);
       });
     }

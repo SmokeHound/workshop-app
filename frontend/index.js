@@ -1,1 +1,1 @@
-app.use('/api/consumables', require('./routes/consumables'));
+// Removed invalid backend code. This file should only contain frontend logic.

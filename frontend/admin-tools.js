@@ -2,15 +2,14 @@
 // Handles bulk import/export, role access, logs, announcements, sessions, API keys, backup/restore
 // frontend/admin-tools.js
 
-import { fetchWithError } from './utils.js';
-import { API_BASE_URL } from './shared/config.js';
+import { fetchWithError, getApiBase } from './utils.js';
 
 // …rest of file remains unchanged
 
 // Example: Load announcements
 export async function loadAnnouncements() {
   try {
-    const res = await fetchWithError(`${API_BASE}/admin/announcements`);
+  const res = await fetchWithError(`${getApiBase()}/admin/announcements`);
     return await res.json();
   } catch (err) {
     console.error('Failed to load announcements', err);
@@ -21,7 +20,7 @@ export async function loadAnnouncements() {
 // Example: Post announcement
 export async function postAnnouncement(text) {
   try {
-    const res = await fetchWithError(`${API_BASE}/admin/announcements`, {
+  const res = await fetchWithError(`${getApiBase()}/admin/announcements`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text })

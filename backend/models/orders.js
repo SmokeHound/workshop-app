@@ -1,8 +1,10 @@
+
 const db = require('../db');
+const bcrypt = require('bcrypt');
 
 exports.createTables = () => {
   db.run(`CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, total REAL)`);
-  db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)`);
+  db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, passwordHash TEXT)`);
 };
 
 exports.saveOrder = (total, callback) => {
@@ -29,5 +31,11 @@ exports.getStats = callback => {
 };
 
 exports.validateUser = (username, password, callback) => {
-  db.get(`SELECT * FROM users WHERE username = ? AND password = ?`, [username, password], callback);
+  db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
+    if (err || !user) return callback(err || null, null);
+    bcrypt.compare(password, user.passwordHash, (err, match) => {
+      if (err || !match) return callback(err || null, null);
+      callback(null, user);
+    });
+  });
 };
