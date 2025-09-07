@@ -87,23 +87,48 @@
       pageUsers.forEach(user => {
         const item = document.createElement('div');
         item.className = 'list-group-item d-flex flex-wrap justify-content-between align-items-center';
-        item.innerHTML = `
-          <span>
-            <strong>${user.username}</strong>
-            <span class="badge bg-secondary ms-2">${user.role}</span>
-            <span class="badge ${user.active ? 'bg-success' : 'bg-warning'} ms-2">${user.active ? 'Active' : 'Inactive'}</span>
-          </span>
-          <div class="btn-group">
-            <select class="form-select form-select-sm me-2 change-role" data-username="${user.username}">
-              <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
-              <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-              <option value="tech" ${user.role === 'tech' ? 'selected' : ''}>Tech</option>
-            </select>
-            <button class="btn btn-sm btn-outline-secondary me-2 reset-pw" data-username="${user.username}">Reset PW</button>
-            <button class="btn btn-sm btn-outline-warning me-2 toggle-status" data-username="${user.username}">${user.active ? 'Disable' : 'Enable'}</button>
-            <button class="btn btn-sm btn-danger" data-username="${user.username}">Remove</button>
-          </div>
-        `;
+        const span = document.createElement('span');
+        const strong = document.createElement('strong');
+        strong.textContent = user.username;
+        const roleBadge = document.createElement('span');
+        roleBadge.className = 'badge bg-secondary ms-2';
+        roleBadge.textContent = user.role;
+        const activeBadge = document.createElement('span');
+        activeBadge.className = 'badge ' + (user.active ? 'bg-success' : 'bg-warning') + ' ms-2';
+        activeBadge.textContent = user.active ? 'Active' : 'Inactive';
+        span.appendChild(strong);
+        span.appendChild(roleBadge);
+        span.appendChild(activeBadge);
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'btn-group';
+        const select = document.createElement('select');
+        select.className = 'form-select form-select-sm me-2 change-role';
+        select.setAttribute('data-username', user.username);
+        ['user', 'admin', 'tech'].forEach(role => {
+          const option = document.createElement('option');
+          option.value = role;
+          option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+          if (user.role === role) option.selected = true;
+          select.appendChild(option);
+        });
+        const btnReset = document.createElement('button');
+        btnReset.className = 'btn btn-sm btn-outline-secondary me-2 reset-pw';
+        btnReset.setAttribute('data-username', user.username);
+        btnReset.textContent = 'Reset PW';
+        const btnToggle = document.createElement('button');
+        btnToggle.className = 'btn btn-sm btn-outline-warning me-2 toggle-status';
+        btnToggle.setAttribute('data-username', user.username);
+        btnToggle.textContent = user.active ? 'Disable' : 'Enable';
+        const btnRemove = document.createElement('button');
+        btnRemove.className = 'btn btn-sm btn-danger';
+        btnRemove.setAttribute('data-username', user.username);
+        btnRemove.textContent = 'Remove';
+        btnGroup.appendChild(select);
+        btnGroup.appendChild(btnReset);
+        btnGroup.appendChild(btnToggle);
+        btnGroup.appendChild(btnRemove);
+        item.appendChild(span);
+        item.appendChild(btnGroup);
         userList.appendChild(item);
       });
       // Pagination controls
@@ -111,8 +136,12 @@
       for (let i = 1; i <= totalPages; i++) {
         const li = document.createElement('li');
         li.className = 'page-item' + (i === currentPage ? ' active' : '');
-        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-        li.onclick = e => { e.preventDefault(); currentPage = i; renderUsers(); };
+        const a = document.createElement('a');
+        a.className = 'page-link';
+        a.href = '#';
+        a.textContent = i;
+        a.onclick = e => { e.preventDefault(); currentPage = i; renderUsers(); };
+        li.appendChild(a);
         pagination.appendChild(li);
       }
     }

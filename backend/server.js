@@ -16,6 +16,19 @@ app.use(
 );
 app.use(helmet());
 app.use(express.json({ limit: '2000kb' }));
+
+// Add Content Security Policy header
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net;");
+  next();
+});
+
+// Standardize error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+});
+
 // Mount routes
 app.use('/api', require('./routes/auth'));
 app.use('/api/orders', require('./routes/orders'));

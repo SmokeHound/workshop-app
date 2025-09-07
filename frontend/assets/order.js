@@ -1,29 +1,17 @@
 
-
-import { API_BASE_URL } from '../../shared/config.js';
+import { getApiBase } from '../utils.js';
 
 const tbody = document.querySelector('#order-table tbody');
 const grandTotalEl = document.getElementById('grand-total');
 
-// runtime‐safe API base URL for browser environments
-const API_BASE_URL =
-  (typeof window !== 'undefined' && window.API_BASE_URL)
-    ? window.API_BASE_URL
-    : '/api';
-
 // Fetch items function
-async function fetchItems() {
-    const res = await fetch(`${API_BASE_URL}/items`, {
-        headers: { Accept: 'application/json' },
-    });
-    if (!res.ok) throw new Error(`Items fetch failed: ${res.status}`);
-    return res.json();
+export async function fetchItems() {
+  const res = await fetch(`${getApiBase()}/items`, {
+    headers: { Accept: 'application/json' },
+  });
+  if (!res.ok) throw new Error(`Items fetch failed: ${res.status}`);
+  return res.json();
 }
-
-// Export functions
-export { fetchItems, saveOrder };
-  .then(r => r.json())
-  .then(data => catalog = data);
 
 const errorEl = document.getElementById('error-message') || createErrorElement();
 let catalog = [];
@@ -106,13 +94,43 @@ function recalcTotal() {
 // Add a new order row
 function addRow() {
   const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td><input class="form-control item" aria-label="Item name" /></td>
-    <td><input type="number" min="0" class="form-control qty" value="0" aria-label="Quantity" /></td>
-    <td><input type="number" step="0.01" class="form-control price" value="0" aria-label="Price" /></td>
-    <td class="line-total">0.00</td>
-    <td><button class="btn btn-sm btn-danger remove" aria-label="Remove row">X</button></td>
-  `;
+    tr.innerHTML = '';
+    const tdItem = document.createElement('td');
+    const inputItem = document.createElement('input');
+    inputItem.className = 'form-control item';
+    inputItem.setAttribute('aria-label', 'Item name');
+    tdItem.appendChild(inputItem);
+  
+    const tdQty = document.createElement('td');
+    const inputQty = document.createElement('input');
+    inputQty.type = 'number';
+    inputQty.min = '0';
+    inputQty.className = 'form-control qty';
+    inputQty.value = '0';
+    inputQty.setAttribute('aria-label', 'Quantity');
+    tdQty.appendChild(inputQty);
+  
+    const tdPrice = document.createElement('td');
+    const inputPrice = document.createElement('input');
+    inputPrice.type = 'number';
+    inputPrice.step = '0.01';
+    inputPrice.className = 'form-control price';
+    inputPrice.value = '0';
+    inputPrice.setAttribute('aria-label', 'Price');
+    tdPrice.appendChild(inputPrice);
+  
+    const tdTotal = document.createElement('td');
+    tdTotal.className = 'line-total';
+    tdTotal.textContent = '0.00';
+  
+    const tdRemove = document.createElement('td');
+    const buttonRemove = document.createElement('button');
+    buttonRemove.className = 'btn btn-sm btn-danger remove';
+    buttonRemove.setAttribute('aria-label', 'Remove row');
+    buttonRemove.textContent = 'X';
+    tdRemove.appendChild(buttonRemove);
+  
+    tr.append(tdItem, tdQty, tdPrice, tdTotal, tdRemove);
   tbody.appendChild(tr);
   tr.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => recalcRow(tr)));
   tr.querySelector('.remove').addEventListener('click', () => {
@@ -172,34 +190,20 @@ document.getElementById('save-order').onclick = async () => {
   }
   const total = +grandTotalEl.textContent;
 
-  // Save order function
-async function saveOrder(order) {
-    const response = await fetch(`${API_BASE_URL}/orders`, {
-    return await response.json();}
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items, total })
-  })
-  .then(r => r.json())
-  .then(o => alert(`Saved as Order #${o.orderId}`))
-  .catch(() => alert('Save failed.'));
+// Save order function
+export async function saveOrder(items, total) {
   try {
-    showLoading(true);
-    const r = await fetch(`${API_BASE_URL}/save-order`, {
+  const response = await fetch(`${getApiBase()}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items, total })
     });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const o = await r.json();
-    if (!o.orderId) throw new Error('Invalid response from server');
-    alert(`Saved as Order #${o.orderId}`);
-    showLoading(false);
-  } catch (e) {
-    showLoading(false);
-    showError('Save failed.');
+    if (!response.ok) throw new Error('Save failed');
+    const order = await response.json();
+    alert(`Saved as Order #${order.orderId}`);
+    return order;
+  } catch (err) {
+    alert('Save failed.');
+    throw err;
   }
-};
 
-// Public API
-export { fetchItems, saveOrder };

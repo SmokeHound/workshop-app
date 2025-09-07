@@ -64,9 +64,18 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false
 });
+const sensitiveLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  standardHeaders: true,
+  legacyHeaders: false
+});
 
 // POST /api/login
 router.post('/login', loginLimiter, async (req, res) => {
+
+// Apply sensitiveLimiter to all admin and user management routes
+router.use(['/me', '/users', '/users/export', '/users/import', '/users/:id', '/apikeys', '/roles', '/announcements', '/logs'], sensitiveLimiter);
   const { username, password } = req.body;
   if (typeof username !== 'string' || typeof password !== 'string' || !username || !password) {
     return res.status(400).json({ error: 'username and password are required' });

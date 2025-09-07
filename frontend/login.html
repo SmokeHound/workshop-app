@@ -33,7 +33,11 @@
     async function loadNav() {
       const res = await fetch('nav.html');
       const html = await res.text();
-      document.getElementById('nav-placeholder').innerHTML = html;
+  const navPlaceholder = document.getElementById('nav-placeholder');
+  navPlaceholder.textContent = '';
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  Array.from(tempDiv.childNodes).forEach(node => navPlaceholder.appendChild(node));
       initThemeToggle('themeToggle');
 
       const currentPage = location.pathname.split('/').pop();

@@ -5,7 +5,7 @@ import {
   showToast,
   initThemeToggle
 } from './utils.js';
-import { API_BASE_URL } from '../shared/config.js';
+import { getApiBase } from './utils.js';
 
 // Load order history and display in list
 document.addEventListener('DOMContentLoaded', async () => {
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const list = document.getElementById('historyList');
   showSpinner('spinnerContainer');
   try {
-    const res = await fetch(`${API_BASE_URL}/orders/history`);
+  const res = await fetch(`${getApiBase()}/orders/history`);
     hideSpinner('spinnerContainer');
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) {
@@ -23,10 +23,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     data.forEach(order => {
       const item = document.createElement('li');
       item.className = 'list-group-item d-flex justify-content-between';
-      item.innerHTML = `
-        <span>${order.item} x ${order.quantity}</span>
-        <small class="text-muted">${new Date(order.timestamp).toLocaleString()}</small>
-      `;
+      const span = document.createElement('span');
+      span.textContent = `${order.item} x ${order.quantity}`;
+      const small = document.createElement('small');
+      small.className = 'text-muted';
+      small.textContent = new Date(order.timestamp).toLocaleString();
+      item.appendChild(span);
+      item.appendChild(small);
       list.appendChild(item);
     });
   } catch {

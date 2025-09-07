@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db'); // Assuming you're using a SQLite DB instance
+const { authMiddleware } = require('./auth');
 
 // Rate limiting middleware
 const rateLimit = require('express-rate-limit');
@@ -24,7 +25,7 @@ router.get('/items', async (req, res) => {
 });
 
 // 🆕 Add a new item
-router.post('/items', async (req, res) => {
+router.post('/items', authMiddleware, async (req, res) => {
   const { name, quantity, price } = req.body;
   try {
     await db.run(
@@ -38,7 +39,7 @@ router.post('/items', async (req, res) => {
 });
 
 // ✏️ Update an existing item
-router.put('/items/:id', async (req, res) => {
+router.put('/items/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
   const { name, quantity, price } = req.body;
   try {
@@ -53,7 +54,7 @@ router.put('/items/:id', async (req, res) => {
 });
 
 // ❌ Delete an item
-router.delete('/items/:id', async (req, res) => {
+router.delete('/items/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
     await db.run('DELETE FROM items WHERE id = ?', [id]);
