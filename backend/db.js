@@ -4,6 +4,7 @@ const db = new sqlite3.Database('./orders.db');
 
 // Create tables for admin features if not exist
 db.serialize(() => {
+  db.run('PRAGMA foreign_keys = ON');
 	db.run(`CREATE TABLE IF NOT EXISTS users (
 		username TEXT PRIMARY KEY,
 		role TEXT,
