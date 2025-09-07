@@ -4,6 +4,27 @@ import { API_BASE_URL } from '../../shared/config.js';
 
 const tbody = document.querySelector('#order-table tbody');
 const grandTotalEl = document.getElementById('grand-total');
+
+// runtime‐safe API base URL for browser environments
+const API_BASE_URL =
+  (typeof window !== 'undefined' && window.API_BASE_URL)
+    ? window.API_BASE_URL
+    : '/api';
+
+// Fetch items function
+async function fetchItems() {
+    const res = await fetch(`${API_BASE_URL}/items`, {
+        headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) throw new Error(`Items fetch failed: ${res.status}`);
+    return res.json();
+}
+
+// Export functions
+export { fetchItems, saveOrder };
+  .then(r => r.json())
+  .then(data => catalog = data);
+
 const errorEl = document.getElementById('error-message') || createErrorElement();
 let catalog = [];
 
@@ -149,6 +170,18 @@ document.getElementById('save-order').onclick = async () => {
     return;
   }
   const total = +grandTotalEl.textContent;
+
+  // Save order function
+async function saveOrder(order) {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
+    return await response.json();}
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items, total })
+  })
+  .then(r => r.json())
+  .then(o => alert(`Saved as Order #${o.orderId}`))
+  .catch(() => alert('Save failed.'));
   try {
     showLoading(true);
     const r = await fetch(`${API_BASE_URL}/save-order`, {
@@ -167,3 +200,5 @@ document.getElementById('save-order').onclick = async () => {
   }
 };
 
+// Public API
+export { fetchItems, saveOrder };
