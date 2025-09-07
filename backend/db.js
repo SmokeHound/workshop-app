@@ -14,16 +14,18 @@ db.serialize(() => {
 		role TEXT PRIMARY KEY,
 		permissions TEXT
 	)`);
-	db.run(`CREATE TABLE IF NOT EXISTS sessions (
-		id TEXT PRIMARY KEY,
-		username TEXT,
-		created INTEGER
-	)`);
-	db.run(`CREATE TABLE IF NOT EXISTS apikeys (
-		key TEXT PRIMARY KEY,
-		name TEXT,
-		created INTEGER
-	)`);
+db.run(`CREATE TABLE IF NOT EXISTS sessions (
+    id TEXT PRIMARY KEY,
+    username TEXT NOT NULL,
+    created INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+)`);
+
+db.run(`CREATE TABLE IF NOT EXISTS apikeys (
+    key TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    created INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+)`);
 	db.run(`CREATE TABLE IF NOT EXISTS announcements (
 		ts INTEGER PRIMARY KEY,
 		text TEXT
