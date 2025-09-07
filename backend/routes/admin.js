@@ -79,8 +79,14 @@ router.get('/roles', async (req, res) => {
 router.put('/roles', async (req, res) => {
   const roles = req.body;
   try {
-    for (const role in roles) {
-      await db.run('INSERT OR REPLACE INTO roles (role, permissions) VALUES (?, ?)', [role, JSON.stringify(roles[role])]);
+    for (const [role, perms] of Object.entries(roles || {})) {
+      if (typeof role !== 'string' || !role.trim()) {
+        return res.status(400).json({ error: 'Invalid role' });
+      }
+      await db.run(
+        'INSERT OR REPLACE INTO roles (role, permissions) VALUES (?, ?)',
+        [role.trim(), JSON.stringify(perms ?? [])]
+      );
     }
     res.json({ message: 'Roles updated', roles });
   } catch (err) {
