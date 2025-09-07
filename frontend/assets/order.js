@@ -189,11 +189,17 @@ document.getElementById('save-order').onclick = async () => {
     return;
   }
   const total = +grandTotalEl.textContent;
+  // You probably want to call saveOrder here, e.g.:
+  // try {
+  //   await saveOrder(items, total);
+  // } catch (e) {}
+
+}; // <-- Close the onclick handler function
 
 // Save order function
 export async function saveOrder(items, total) {
   try {
-  const response = await fetch(`${getApiBase()}/orders`, {
+    const response = await fetch(`${getApiBase()}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items, total })
@@ -206,4 +212,4 @@ export async function saveOrder(items, total) {
     alert('Save failed.');
     throw err;
   }
-
+}

@@ -61,8 +61,7 @@
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    import { showToast } from './utils.js';
-    import { API_BASE_URL } from '../shared/config.js';
+  import { showToast, getApiBase } from './utils.js';
     // Load nav
     async function loadNav() {
       const res = await fetch('nav.html');
@@ -83,7 +82,7 @@
         showToast('Invalid file format.', 'error');
         return;
       }
-      const res = await fetch(`${API_BASE_URL}/admin/users/import`, {
+  const res = await fetch(`${getApiBase()}/admin/users/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ users })
@@ -95,7 +94,7 @@
       }
     };
     document.getElementById('exportBtn').onclick = async () => {
-      const res = await fetch(`${API_BASE_URL}/admin/users/export`);
+  const res = await fetch(`${getApiBase()}/admin/users/export`);
       if (!res.ok) return showToast('Export failed.', 'error');
       const users = await res.json();
       const blob = new Blob([JSON.stringify(users, null, 2)], { type: 'application/json' });
@@ -109,7 +108,7 @@
     };
     // Role-based access control
     async function renderRoleAccess() {
-      const res = await fetch(`${API_BASE_URL}/admin/roles`);
+  const res = await fetch(`${getApiBase()}/admin/roles`);
       const rolesObj = await res.json();
       const roles = Object.keys(rolesObj);
       const pages = ['Home', 'Order', 'History', 'Item Admin', 'User Management', 'Admin Tools'];
@@ -161,7 +160,7 @@
               if (box && box.checked) newRoles[r].push(p);
             });
           });
-          await fetch(`${API_BASE_URL}/admin/roles`, {
+          await fetch(`${getApiBase()}/admin/roles`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newRoles)
@@ -174,14 +173,14 @@
     // System logs
     document.getElementById('refreshLogs').onclick = async () => {
       document.getElementById('system-logs').textContent = 'Fetching logs...';
-      const res = await fetch(`${API_BASE_URL}/admin/logs`);
+  const res = await fetch(`${getApiBase()}/admin/logs`);
       if (!res.ok) return showToast('Failed to fetch logs.', 'error');
       const logs = await res.json();
       document.getElementById('system-logs').textContent = logs.join('\n');
     };
     // Announcements
     async function loadAnnouncements() {
-      const res = await fetch(`${API_BASE_URL}/admin/announcements`);
+  const res = await fetch(`${getApiBase()}/admin/announcements`);
       const list = document.getElementById('announcement-list');
       list.textContent = '';
       if (!res.ok) return;
@@ -205,7 +204,7 @@
       e.preventDefault();
       const text = document.getElementById('announcementText').value.trim();
       if (!text) return showToast('Announcement required.', 'error');
-      const res = await doFetch(`${API_BASE_URL}/admin/announcements`, {
+  const res = await doFetch(`${getApiBase()}/admin/announcements`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
@@ -213,19 +212,16 @@
       if (res.ok) {
         showToast('Announcement posted.', 'success');
         document.getElementById('announcementText').value = '';
+        loadAnnouncements();
       } else {
         const err = await res.text();
         showToast(`Failed to post announcement: ${err || res.status}`, 'error');
-      }
-        loadAnnouncements();
-      } else {
-        showToast('Failed to post announcement.', 'error');
       }
     };
     document.getElementById('announcement-list').onclick = async e => {
       if (e.target.classList.contains('btn-danger')) {
         const ts = e.target.getAttribute('data-ts');
-        const res = await fetch(`${API_BASE_URL}/admin/announcements/${ts}`, { method: 'DELETE' });
+  const res = await fetch(`${getApiBase()}/admin/announcements/${ts}`, { method: 'DELETE' });
         if (res.ok) {
           showToast('Announcement removed.', 'success');
           loadAnnouncements();
@@ -238,7 +234,7 @@
     document.getElementById('refreshSessions').onclick = async () => {
       const list = document.getElementById('session-list');
       list.innerHTML = '';
-      const res = await fetch(`${API_BASE_URL}/admin/sessions`);
+  const res = await fetch(`${getApiBase()}/admin/sessions`);
       if (!res.ok) return showToast('Failed to fetch sessions.', 'error');
       const sessions = await res.json();
       sessions.forEach(s => {
@@ -257,7 +253,7 @@
     document.getElementById('session-list').onclick = async e => {
       if (e.target.classList.contains('btn-danger')) {
         const id = e.target.getAttribute('data-id');
-        const res = await fetch(`${API_BASE_URL}/admin/sessions/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${getApiBase()}/admin/sessions/${id}`, { method: 'DELETE' });
         if (res.ok) {
           showToast('Session revoked.', 'success');
           document.getElementById('refreshSessions').click();
@@ -268,7 +264,7 @@
     };
     // API key management
     async function loadApiKeys() {
-      const res = await fetch(`${API_BASE_URL}/admin/apikeys`);
+  const res = await fetch(`${getApiBase()}/admin/apikeys`);
       const list = document.getElementById('api-key-list');
       list.innerHTML = '';
       if (!res.ok) return;
@@ -298,7 +294,7 @@
       e.preventDefault();
       const name = document.getElementById('apiKeyName').value.trim();
       if (!name) return showToast('Key name required.', 'error');
-      const res = await fetch(`${API_BASE_URL}/admin/apikeys`, {
+  const res = await fetch(`${getApiBase()}/admin/apikeys`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name })
@@ -314,7 +310,7 @@
     document.getElementById('api-key-list').onclick = async e => {
       if (e.target.classList.contains('btn-danger')) {
         const key = e.target.getAttribute('data-key');
-        const res = await fetch(`${API_BASE_URL}/admin/apikeys/${key}`, { method: 'DELETE' });
+  const res = await fetch(`${getApiBase()}/admin/apikeys/${key}`, { method: 'DELETE' });
         if (res.ok) {
           showToast('API key revoked.', 'success');
           loadApiKeys();
@@ -325,7 +321,7 @@
     };
     // Data backup/restore
     document.getElementById('backupBtn').onclick = async () => {
-      const res = await fetch(`${API_BASE_URL}/admin/backup`);
+  const res = await fetch(`${getApiBase()}/admin/backup`);
       if (!res.ok) return showToast('Backup failed.', 'error');
       const backup = await res.json();
       const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
@@ -349,7 +345,7 @@
         showToast('Invalid file format.', 'error');
         return;
       }
-      const res = await fetch(`${API_BASE_URL}/admin/restore`, {
+  const res = await fetch(`${getApiBase()}/admin/restore`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
