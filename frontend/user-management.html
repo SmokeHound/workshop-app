@@ -64,7 +64,7 @@
     const pageSize = 10;
     async function loadUsers() {
       try {
-        const res = await fetch(`${API_BASE_URL}/users`);
+        const res = await fetch(`${API_BASE_URL}/users/export`);
         allUsers = await res.json();
         renderUsers();
       } catch {
