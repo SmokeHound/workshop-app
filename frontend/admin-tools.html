@@ -237,7 +237,20 @@
       keys.forEach(k => {
         const item = document.createElement('li');
         item.className = 'list-group-item d-flex justify-content-between';
-        item.innerHTML = `<span>${k.name} — ${k.key}</span><button class="btn btn-sm btn-danger" data-key="${k.key}">Revoke</button>`;
+        // Replace full-key rendering with a masked label and safe identifier
+        const span = document.createElement('span');
+        const masked = k.prefix
+          ? `${k.name} — ${k.prefix}…`
+          : `${k.name} — ••••`;
+        span.textContent = masked;
+
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-danger';
+        btn.dataset.key = k.id ?? k.prefix;
+        btn.textContent = 'Revoke';
+
+        // Swap in the new children at the same position
+        item.replaceChildren(span, btn);
         list.appendChild(item);
       });
     }
