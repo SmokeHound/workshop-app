@@ -41,7 +41,7 @@
       e.preventDefault();
       const name = document.getElementById('name').value.trim();
       const price = parseFloat(document.getElementById('price').value);
-      if (!name || price < 0) {
+      if (!name || !Number.isFinite(price) || price < 0) {
         showToast('Invalid item name or price.', 'error');
         return;
       }
