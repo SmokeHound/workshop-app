@@ -14,14 +14,53 @@ router.get('/users/export', async (req, res) => {
   }
 });
 router.post('/users/import', async (req, res) => {
-  const { users } = req.body;
-  if (!Array.isArray(users)) return res.status(400).json({ error: 'Invalid users data' });
-  try {
-    for (const u of users) {
-      await db.run('INSERT OR REPLACE INTO users (username, role, active) VALUES (?, ?, ?)', [u.username, u.role, u.active ?? 1]);
+  const { users } = req.body || {};
+  if (!Array.isArray(users)) {
+    return res.status(400).json({ error: 'Invalid users data' });
+  }
+
+  // Validate each user payload
+  for (const u of users) {
+    if (!u || typeof u.username !== 'string' || !u.username.trim()) {
+      return res.status(400).json({ error: 'Invalid username' });
     }
+    if (!['user', 'admin', 'tech'].includes(u.role)) {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+    if (u.active != null && ![0, 1, true, false].includes(u.active)) {
+      return res.status(400).json({ error: 'Invalid active flag' });
+    }
+  }
+
+  try {
+    // Start transaction
+    await db.run('BEGIN');
+
+    for (const u of users) {
+      await db.run(
+        `INSERT INTO users (username, role, active)
+         VALUES (?, ?, ?)
+         ON CONFLICT(username) DO UPDATE SET
+           role     = excluded.role,
+           active   = excluded.active`,
+        [
+          u.username.trim(),
+          u.role,
+          (u.active ?? 1) ? 1 : 0
+        ]
+      );
+    }
+
+    // Commit if all succeeded
+    await db.run('COMMIT');
     res.json({ message: 'Users imported' });
+
   } catch (err) {
+    // Roll back on any failure
+    try {
+      await db.run('ROLLBACK');
+    } catch (_) { /* ignore rollback errors */ }
+
     res.status(500).json({ error: 'Failed to import users' });
   }
 });
