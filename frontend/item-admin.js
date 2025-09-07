@@ -17,7 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
     showSpinner('spinnerContainer');
     const name = document.getElementById('itemName').value.trim();
     const quantity = parseInt(document.getElementById('itemQuantity').value, 10);
-    if (!name || quantity < 0) {
+    if (
+      !name ||
+      !Number.isFinite(quantity) ||
+      !Number.isInteger(quantity) ||
+      quantity < 0
+    ) {
       showToast('Invalid item name or quantity.', 'error');
       hideSpinner('spinnerContainer');
       return;
