@@ -40,6 +40,7 @@ function createErrorElement() {
   const el = document.createElement('div');
   el.id = 'error-message';
   el.style.cssText = 'color:red;display:none;margin:1em 0;';
+  el.setAttribute('role', 'alert');
   document.body.prepend(el);
   return el;
 }
