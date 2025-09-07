@@ -73,4 +73,5 @@
     { "code": "7515", "description": "W21/5W WEDGE STOP/TAIL", "quantity": null },
     { "code": "7506", "description": "BA15s BAYONET SINGLE", "quantity": 10 },
     { "code": "7507", "description": "BAU15s AMBER BAYONET OFFSET", "quantity": null },
-    { "code": "7528", "description": "BAY15d BAYONET STOP/TAIL", "quantity": null },
+    { "code": "7528", "description": "BAY15d BAYONET STOP/TAIL", "quantity": null }
+  ],
