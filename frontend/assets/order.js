@@ -1,10 +1,14 @@
+
+import { API_BASE_URL } from '../../shared/config.js';
+
 const tbody = document.querySelector('#order-table tbody');
 const grandTotalEl = document.getElementById('grand-total');
 let catalog = [];
 
-fetch("https://workshop-backend.joshburt.com.au/api/items")
-  .then(r => r.json())
-  .then(data => catalog = data);
+fetch(`${API_BASE_URL}/items`)
+  .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+  .then(data => { catalog = data; })
+  .catch(() => alert('Failed to load item catalogue.'));
 
 function formatMoney(x) {
   return parseFloat(x).toFixed(2);
@@ -70,12 +74,12 @@ document.getElementById('save-order').onclick = () => {
   });
   const total = +grandTotalEl.textContent;
 
-  fetch("https://workshop-backend.joshburt.com.au/api/save-order", {
+  fetch(`${API_BASE_URL}/save-order`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ items, total })
   })
-  .then(r => r.json())
+  .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
   .then(o => alert(`Saved as Order #${o.orderId}`))
   .catch(() => alert('Save failed.'));
 };
