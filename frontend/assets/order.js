@@ -94,5 +94,5 @@ async function saveOrder(order) {
   .catch(() => alert('Save failed.'));
 };
 
-
-
+// Public API
+export { fetchItems, saveOrder };
