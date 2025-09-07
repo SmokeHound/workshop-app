@@ -201,7 +201,13 @@
       sessions.forEach(s => {
         const item = document.createElement('div');
         item.className = 'list-group-item d-flex justify-content-between';
-        item.innerHTML = `<span>${s.username}</span><button class="btn btn-sm btn-danger" data-id="${s.id}">Revoke</button>`;
+        const span = document.createElement('span');
+        span.textContent = s.username;
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-danger';
+        btn.dataset.id = s.id;
+        btn.textContent = 'Revoke';
+        item.replaceChildren(span, btn);
         list.appendChild(item);
       });
     };
