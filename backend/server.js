@@ -15,7 +15,7 @@ app.use(
   })
 );
 app.use(helmet());
-app.use(express.json({ limit: '200kb' }));
+app.use(express.json({ limit: '2000kb' }));
 // Mount routes
 app.use('/api', require('./routes/auth'));
 app.use('/api/orders', require('./routes/orders'));
