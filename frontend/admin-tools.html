@@ -117,7 +117,10 @@
       container.innerHTML = '<table class="table table-bordered"><thead><tr><th>Role</th>' +
         pages.map(p => `<th>${p}</th>`).join('') + '</tr></thead><tbody>' +
         roles.map(role => `<tr><td>${role}</td>` +
-          pages.map(page => `<td><input type="checkbox" ${rolesObj[role].includes('*') || rolesObj[role].includes(page) ? 'checked' : ''} data-role="${role}" data-page="${page}"></td>`).join('') + '</tr>').join('') + '</tbody></table>';
+          pages.map(page => {
+  const checked = rolesObj[role].includes('*') || rolesObj[role].includes(page) ? 'checked' : '';
+  return `<td><input type="checkbox" ${checked} data-role="${role}" data-page="${page}"></td>`;
+}).join('')
       container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         cb.onchange = async () => {
           // Collect new roles
