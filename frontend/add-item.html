@@ -4,17 +4,15 @@
   <meta charset="UTF-8" />
   <title>Add Item</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
   <link href="assets/styles.css" rel="stylesheet" />
 </head>
-<body class="bg-light">
-  <nav class="navbar navbar-dark bg-dark mb-4 px-4">
-    <span class="navbar-brand">📦 Add Stock Item</span>
-    <a href="index.html" class="btn btn-outline-light btn-sm">Dashboard</a>
-  </nav>
-
-  <div class="container">
+<body>
+  <div id="nav-placeholder"></div>
+  <main class="container" style="margin-left: 270px; padding-top: 20px; max-width: 600px;">
+    <h1>➕ Add Stock Item</h1>
+    <p>Use this form to add a new item to the inventory.</p>
     <form id="item-form" class="card p-4 shadow-sm bg-white">
       <div class="mb-3">
         <label for="name" class="form-label">Item Name</label>
@@ -25,18 +23,40 @@
         <input type="number" id="price" class="form-control" step="0.01" required />
       </div>
       <button class="btn btn-success" type="submit">
-        <i class="fas fa-plus-circle"></i> Add Item
+        <i class="bi bi-plus-circle"></i> Add Item
       </button>
     </form>
     <div id="result" class="mt-3 text-success fw-bold" style="display:none;"></div>
-  </div>
-
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    // Import shared API base and toast utility
-    import { showToast } from './utils.js';
-    import { API_BASE_URL } from '../shared/config.js';
-
-    // Handle form submission
+    import { showToast, getApiBase, initThemeToggle } from './utils.js';
+    async function loadNav() {
+      try {
+        const res = await fetch('nav.html');
+        if (!res.ok) throw new Error('Failed to load navigation');
+        const html = await res.text();
+        const navPlaceholder = document.getElementById('nav-placeholder');
+        navPlaceholder.innerHTML = html;
+        initThemeToggle('themeToggle');
+        const currentPage = location.pathname.split('/').pop();
+        document.querySelectorAll('[data-page]').forEach(link => {
+          const icon = link.querySelector('i');
+          if (link.getAttribute('data-page') === currentPage) {
+            link.classList.add('active');
+            link.setAttribute('aria-current', 'page');
+            if (icon) icon.classList.add('text-light');
+          } else {
+            link.classList.remove('active');
+            link.removeAttribute('aria-current');
+            if (icon) icon.classList.remove('text-light');
+          }
+        });
+      } catch (e) {
+        showToast('Navigation failed to load', 'error');
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadNav);
     document.getElementById('item-form').onsubmit = async e => {
       e.preventDefault();
       const name = document.getElementById('name').value.trim();
@@ -46,7 +66,7 @@
         return;
       }
       try {
-        const r = await fetch(`${API_BASE_URL}/items`, {
+        const r = await fetch(`${getApiBase()}/items`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, price })
