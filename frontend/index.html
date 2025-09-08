@@ -11,12 +11,9 @@
 <body>
   <div id="nav-placeholder"></div>
 
-
-  <!-- Main content area, responsive and accessible -->
   <main class="container-fluid" style="margin-left: 270px; padding-top: 20px;">
     <h1>Welcome to the Workshop App</h1>
     <p>Select a page from the sidebar to get started.</p>
-    <!-- Toast notifications for errors/info -->
     <div id="toastContainer" aria-live="polite" style="position:fixed;top:1em;right:1em;z-index:9999;"></div>
   </main>
 
@@ -31,7 +28,8 @@
         const res = await fetch('nav.html');
         if (!res.ok) throw new Error('Failed to load navigation');
         const html = await res.text();
-        document.getElementById('nav-placeholder').innerHTML = html;
+        const navPlaceholder = document.getElementById('nav-placeholder');
+        navPlaceholder.innerHTML = html;
         initThemeToggle('themeToggle');
 
         const currentPage = location.pathname.split('/').pop();
@@ -39,9 +37,11 @@
           const icon = link.querySelector('i');
           if (link.getAttribute('data-page') === currentPage) {
             link.classList.add('active');
+            link.setAttribute('aria-current', 'page');
             if (icon) icon.classList.add('text-light');
           } else {
             link.classList.remove('active');
+            link.removeAttribute('aria-current');
             if (icon) icon.classList.remove('text-light');
           }
         });
