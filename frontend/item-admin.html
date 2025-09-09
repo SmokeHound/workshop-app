@@ -10,10 +10,9 @@
 </head>
 <body>
   <a href="#main-content" class="visually-hidden-focusable">Skip to main content</a>
-  <div id="nav-placeholder"></div>
+  <div id="nav-placeholder" aria-hidden="true"></div>
 
-  <main class="container-fluid" style="margin-left: 270px; padding-top: 20px;">
-  <main class="container-fluid" style="margin-left: 270px; padding-top: 20px;" id="main-content">
+  <main class="container-fluid" id="main-content" style="padding-top: 20px;">
     <h1>🛠️ Item Admin</h1>
     <p>Manage consumable items, update quantities, and sync with backend.</p>
     <!-- Admin UI goes here -->
@@ -50,5 +49,6 @@
 
     document.addEventListener('DOMContentLoaded', loadNav);
   </script>
+  <script src="assets/item-admin.js"></script>
 </body>
 </html>
