@@ -11,7 +11,7 @@ export function setActiveNav() {
     }
   });
 }
-import { API_BASE_URL as DEFAULT_API_BASE_URL } from '../shared/config.js';
+import { API_BASE_URL as DEFAULT_API_BASE_URL } from './shared/config.js';
 
 // Utility to get API base, allowing localStorage override for dev/testing
 export function getApiBase() {
@@ -50,6 +50,12 @@ export function hideSpinner(containerId) {
 
 // Toast System
 export function showToast(message, type = 'info') {
+  const toastContainer = document.getElementById('toastContainer');
+  if (!toastContainer) {
+    console.warn('Toast container not found');
+    return;
+  }
+  
   const iconMap = {
     success: '✅',
     error: '❌',
@@ -70,7 +76,7 @@ export function showToast(message, type = 'info') {
   dFlex.appendChild(toastBody);
   dFlex.appendChild(btnClose);
   toast.appendChild(dFlex);
-  document.getElementById('toastContainer').appendChild(toast);
+  toastContainer.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
 
@@ -83,6 +89,11 @@ export function applyTheme(theme) {
 
 export function initThemeToggle(toggleBtnId) {
   const btn = document.getElementById(toggleBtnId);
+  if (!btn) {
+    console.warn(`Theme toggle button with id '${toggleBtnId}' not found`);
+    return;
+  }
+  
   const savedTheme = localStorage.getItem('themePreference') || 'light';
   applyTheme(savedTheme);
   btn.textContent = '';
