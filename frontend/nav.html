@@ -1,19 +1,4 @@
 </ul>
-<script>
-  // Highlight active nav item based on current page
-  document.addEventListener('DOMContentLoaded', function() {
-    var currentPage = location.pathname.split('/').pop();
-    document.querySelectorAll('.nav-link[data-page]').forEach(function(link) {
-      if (link.getAttribute('data-page') === currentPage) {
-        link.classList.add('active');
-        link.setAttribute('aria-current', 'page');
-      } else {
-        link.classList.remove('active');
-        link.removeAttribute('aria-current');
-      }
-    });
-  });
-</script>
   <li><a href="admin-tools.html" class="nav-link" data-page="admin-tools.html" aria-label="Admin Tools"><i class="bi bi-gear-wide-connected"></i> Admin Tools</a></li>
   <li><a href="user-management.html" class="nav-link" data-page="user-management.html" aria-label="User Management"><i class="bi bi-people"></i> User Management</a></li>
 <div class="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary sidebar" style="width: 250px; height: 100vh; position: fixed;">
