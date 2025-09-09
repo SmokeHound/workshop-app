@@ -9,9 +9,11 @@
   <link href="assets/styles.css" rel="stylesheet" />
 </head>
 <body>
+  <a href="#main-content" class="visually-hidden-focusable">Skip to main content</a>
   <div id="nav-placeholder"></div>
 
-  <main class="container-fluid" style="margin-left: 270px; padding-top: 20px;">
+  <!-- Main content area, responsive and accessible -->
+  <main class="container-fluid" style="margin-left: 270px; padding-top: 20px;" id="main-content">
     <h1>Welcome to the Workshop App</h1>
     <p>Select a page from the sidebar to get started.</p>
     <div id="toastContainer" aria-live="polite" style="position:fixed;top:1em;right:1em;z-index:9999;"></div>
@@ -20,7 +22,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
     // Import shared utilities for theme, toast, and spinner
-    import { initThemeToggle, showToast } from './utils.js';
+  import { initThemeToggle, showToast, setActiveNav } from './utils.js';
 
     // Load navigation bar and highlight current page
     async function loadNav() {
@@ -28,23 +30,9 @@
         const res = await fetch('nav.html');
         if (!res.ok) throw new Error('Failed to load navigation');
         const html = await res.text();
-        const navPlaceholder = document.getElementById('nav-placeholder');
-        navPlaceholder.innerHTML = html;
-        initThemeToggle('themeToggle');
-
-        const currentPage = location.pathname.split('/').pop();
-        document.querySelectorAll('[data-page]').forEach(link => {
-          const icon = link.querySelector('i');
-          if (link.getAttribute('data-page') === currentPage) {
-            link.classList.add('active');
-            link.setAttribute('aria-current', 'page');
-            if (icon) icon.classList.add('text-light');
-          } else {
-            link.classList.remove('active');
-            link.removeAttribute('aria-current');
-            if (icon) icon.classList.remove('text-light');
-          }
-        });
+  document.getElementById('nav-placeholder').innerHTML = html;
+  setActiveNav();
+  initThemeToggle('themeToggle');
       } catch (e) {
         showToast('Navigation failed to load', 'error');
       }

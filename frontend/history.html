@@ -9,8 +9,10 @@
   <link href="assets/styles.css" rel="stylesheet" />
 </head>
 <body>
+  <a href="#main-content" class="visually-hidden-focusable">Skip to main content</a>
   <div id="nav-placeholder"></div>
   <main class="container-fluid" style="margin-left: 270px; padding-top: 20px;">
+  <main class="container-fluid" style="margin-left: 270px; padding-top: 20px;" id="main-content">
     <h1>📜 Order History</h1>
     <p>View previously submitted orders and their status.</p>
     <div id="historyApp"></div>
@@ -22,7 +24,8 @@
       const res = await fetch('nav.html');
       const html = await res.text();
       document.getElementById('nav-placeholder').innerHTML = html;
-      initThemeToggle('themeToggle');
+  setActiveNav();
+  initThemeToggle();
       const currentPage = location.pathname.split('/').pop();
       document.querySelectorAll('[data-page]').forEach(link => {
         const icon = link.querySelector('i');
