@@ -118,6 +118,9 @@
     async function loadNav() {
       try {
         const res = await fetch('nav.html');
+        if (!res.ok) {
+          throw new Error(`Failed to load nav.html: ${res.status} ${res.statusText}`);
+        }
         const html = await res.text();
   const navPlaceholder = document.getElementById('nav-placeholder');
   const tempDiv = document.createElement('div');
