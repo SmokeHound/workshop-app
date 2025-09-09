@@ -29,6 +29,7 @@
       const html = await res.text();
       document.getElementById('nav-placeholder').innerHTML = html;
   setActiveNav();
+  initThemeToggle();
 
       const currentPage = location.pathname.split('/').pop();
       document.querySelectorAll('[data-page]').forEach(link => {
