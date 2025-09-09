@@ -1,3 +1,16 @@
+// Utility to set active nav item
+export function setActiveNav() {
+  const currentPage = location.pathname.split('/').pop().split('?')[0].split('#')[0];
+  document.querySelectorAll('.nav-link[data-page]').forEach(link => {
+    if (link.getAttribute('data-page') === currentPage) {
+      link.classList.add('active');
+      link.setAttribute('aria-current', 'page');
+    } else {
+      link.classList.remove('active');
+      link.removeAttribute('aria-current');
+    }
+  });
+}
 // ...existing code...
 
 import { API_BASE_URL as DEFAULT_API_BASE_URL } from '../shared/config.js';
