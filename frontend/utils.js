@@ -1,5 +1,5 @@
-// ...existing code...
-
+// utils.js
+// Import API_BASE_URL from shared config
 import { API_BASE_URL as DEFAULT_API_BASE_URL } from '../shared/config.js';
 
 // Utility to get API base, allowing localStorage override for dev/testing
@@ -8,9 +8,6 @@ export function getApiBase() {
 }
 
 export const API_BASE_URL = DEFAULT_API_BASE_URL;
-// utils.js
-// Import API_BASE_URL from shared config
-import { API_BASE_URL } from '../shared/config.js';
 
 // Utility for fetch with error handling
 export async function fetchWithError(url, options = {}) {
