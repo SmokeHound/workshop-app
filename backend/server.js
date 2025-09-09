@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const helmet = require('helmet');
 require('dotenv').config();
 
 const app = express();
@@ -14,8 +13,9 @@ app.use(
     credentials: true
   })
 );
-app.use(helmet());
-app.use(express.json({ limit: '2000kb' }));
+
+const { applySecurity } = require('./middleware/security');
+applySecurity(app);
 
 // Add Content Security Policy header
 app.use((req, res, next) => {
@@ -23,17 +23,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Standardize error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
-});
-
 // Mount routes
 app.use('/api', require('./routes/auth'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/consumables', require('./routes/consumables'));
 app.use('/api/admin', require('./routes/admin'));
+
+// Standardize error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+});
 
 // Start server
 const PORT = process.env.PORT || 3000;
