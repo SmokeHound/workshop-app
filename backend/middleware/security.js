@@ -21,8 +21,10 @@ function applySecurity(app) {
   // Apply limiter to all requests
   app.use(limiter);
 
-  // Enforce a reasonable JSON body size limit
-  app.use(express.json({ limit: '100kb' }));
+  // Enforce a reasonable JSON body size limit.
+  // The default is set to 2000kb to avoid breaking existing clients. You can override with JSON_BODY_LIMIT env variable if needed.
+  const jsonBodyLimit = process.env.JSON_BODY_LIMIT || '2000kb';
+  app.use(express.json({ limit: jsonBodyLimit }));
 }
 
 module.exports = { applySecurity };
