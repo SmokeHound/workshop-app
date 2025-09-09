@@ -113,17 +113,23 @@
         document.body.classList.remove('high-contrast');
       }
     };
-    // Load nav
+
+  <!-- Nav loader script -->
     async function loadNav() {
-      const res = await fetch('nav.html');
-      const html = await res.text();
+      try {
+        const res = await fetch('nav.html');
+        const html = await res.text();
   const navPlaceholder = document.getElementById('nav-placeholder');
   navPlaceholder.textContent = '';
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
   Array.from(tempDiv.childNodes).forEach(node => navPlaceholder.appendChild(node));
+      } catch (err) {
+        console.error('Failed to load nav:', err);
+      }
     }
-    document.addEventListener('DOMContentLoaded', loadNav);
+
+    loadNav();
   </script>
 </body>
 </html>
