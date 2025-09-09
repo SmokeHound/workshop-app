@@ -4,7 +4,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/SmokeHound/workshop-app)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/SmokeHound/workshop-app?label=CodeRabbit+Reviews)
 
-This monorepo contains the frontend, backend, and shared modules for the Workshop App. It’s designed for modular development, shared configuration, and streamlined deployment. The app enables users to order workshop consumables, view history, and allows admins to manage inventory.
+This monorepo contains the frontend, backend, and shared modules for the Workshop App. It’s designed for modular development, shared configuration, and streamlined deployment.
 
 ---
 
@@ -15,7 +15,6 @@ workshop-app/
 ├── frontend/   # Static HTML/JS/CSS client interface
 ├── backend/    # Express + SQLite API server
 ├── shared/     # Shared config/constants
-├── package.json
 └── README.md
 ```
 
@@ -35,6 +34,7 @@ workshop-app/
 - Centralized error handling & logging
 - API rate limiting & health check
 - Input validation & XSS protection
+- *more to come...
 
 ---
 
@@ -45,7 +45,6 @@ workshop-app/
 - **Admin/Settings:** Modular JS, persistent API endpoints
 - **Auth:** JWT, bcrypt
 - **DevOps:** Netlify (frontend), Render (backend), GitHub Actions (CI)
-- **Testing:** Jest, Supertest
 
 ---
 
@@ -58,11 +57,7 @@ workshop-app/
 
 ### Backend
 
-```bash
-cd backend
-npm install
-node index.js
-```
+*** TO BE UPDATED!! ***
 
 You may need to configure environment variables in `.env` (see `.env-example`):
 
@@ -86,7 +81,7 @@ Update any API endpoint URLs in `shared/config.js` if needed.
 - Visit the frontend app (e.g. [https://workshop.joshburt.com.au](https://workshop.joshburt.com.au))
 - Login with appropriate role credentials
 - Submit orders, view history, or manage items (admin)
-- Theme and preferences stored in `localStorage`
+- Theme and preferences stored
 
 ---
 
