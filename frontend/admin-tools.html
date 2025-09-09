@@ -206,7 +206,7 @@
       e.preventDefault();
       const text = document.getElementById('announcementText').value.trim();
       if (!text) return showToast('Announcement required.', 'error');
-  const res = await doFetch(`${getApiBase()}/admin/announcements`, {
+  const res = await fetch(`${getApiBase()}/admin/announcements`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
