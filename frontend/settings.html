@@ -130,7 +130,11 @@
       }
     }
 
-    loadNav();
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', loadNav, { once: true });
+    } else {
+      loadNav();
+    }
   </script>
 </body>
 </html>
