@@ -3,11 +3,101 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const db = require('../db');
-const { authenticateToken, requireRole, auditLog } = require('../middleware/auth');
+const { authenticateToken, requireRole, auditLog, csrfProtection } = require('../middleware/auth');
 
-// Apply authentication to all admin routes
+// Apply authentication and CSRF protection to all admin routes
 router.use(authenticateToken);
 router.use(requireRole('admin'));
+router.use(csrfProtection);
+
+// --- Bulk Import/Export Users (must come before :username routes) ---
+router.get('/users/export', auditLog('Users export'), async (req, res) => {
+  try {
+    const users = await new Promise((resolve, reject) => {
+      db.all('SELECT username, role, active, created_at FROM users', (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows || []);
+      });
+    });
+    res.json(users);
+  } catch (err) {
+    console.error('Export users error:', err);
+    res.status(500).json({ error: 'Failed to export users' });
+  }
+});
+
+router.post('/users/import', 
+  body('users').isArray().withMessage('Users must be an array'),
+  auditLog('Users import'), 
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: 'Validation failed', details: errors.array() });
+    }
+
+    const { users } = req.body;
+
+    // Validate each user payload
+    for (const u of users) {
+      if (!u || typeof u.username !== 'string' || !u.username.trim()) {
+        return res.status(400).json({ error: 'Invalid username' });
+      }
+      if (!['user', 'admin', 'tech'].includes(u.role)) {
+        return res.status(400).json({ error: 'Invalid role' });
+      }
+      if (u.active != null && ![0, 1, true, false].includes(u.active)) {
+        return res.status(400).json({ error: 'Invalid active flag' });
+      }
+    }
+
+    try {
+      // Start transaction
+      await new Promise((resolve, reject) => {
+        db.run('BEGIN', err => err ? reject(err) : resolve());
+      });
+
+      for (const u of users) {
+        await new Promise((resolve, reject) => {
+          db.run(
+            `INSERT INTO users (username, role, active, passwordHash)
+             VALUES (?, ?, ?, ?)
+             ON CONFLICT(username) DO UPDATE SET
+               role     = excluded.role,
+               active   = excluded.active`,
+            [
+              u.username.trim(),
+              u.role,
+              (u.active ?? 1) ? 1 : 0,
+              '$2b$12$defaultHashForImportedUsers' // Default hash, users need to reset password
+            ],
+            function(err) {
+              if (err) reject(err);
+              else resolve(this);
+            }
+          );
+        });
+      }
+
+      // Commit if all succeeded
+      await new Promise((resolve, reject) => {
+        db.run('COMMIT', err => err ? reject(err) : resolve());
+      });
+      
+      res.json({ message: 'Users imported successfully' });
+
+    } catch (err) {
+      // Roll back on any failure
+      try {
+        await new Promise((resolve) => {
+          db.run('ROLLBACK', () => resolve());
+        });
+      } catch (_) { /* ignore rollback errors */ }
+
+      console.error('Import users error:', err);
+      res.status(500).json({ error: 'Failed to import users' });
+    }
+  }
+);
 
 // --- Individual User Management ---
 // GET /api/admin/users/:username
@@ -154,94 +244,6 @@ router.delete('/users/:username', auditLog('User deletion'), async (req, res) =>
     res.status(500).json({ error: 'Failed to delete user' });
   }
 });
-
-// --- Bulk Import/Export Users ---
-router.get('/users/export', auditLog('Users export'), async (req, res) => {
-  try {
-    const users = await new Promise((resolve, reject) => {
-      db.all('SELECT username, role, active, created_at FROM users', (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
-    res.json(users);
-  } catch (err) {
-    console.error('Export users error:', err);
-    res.status(500).json({ error: 'Failed to export users' });
-  }
-});
-router.post('/users/import', 
-  body('users').isArray().withMessage('Users must be an array'),
-  auditLog('Users import'), 
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: 'Validation failed', details: errors.array() });
-    }
-
-    const { users } = req.body;
-
-    // Validate each user payload
-    for (const u of users) {
-      if (!u || typeof u.username !== 'string' || !u.username.trim()) {
-        return res.status(400).json({ error: 'Invalid username' });
-      }
-      if (!['user', 'admin', 'tech'].includes(u.role)) {
-        return res.status(400).json({ error: 'Invalid role' });
-      }
-      if (u.active != null && ![0, 1, true, false].includes(u.active)) {
-        return res.status(400).json({ error: 'Invalid active flag' });
-      }
-    }
-
-    try {
-      // Start transaction
-      await new Promise((resolve, reject) => {
-        db.run('BEGIN', err => err ? reject(err) : resolve());
-      });
-
-      for (const u of users) {
-        await new Promise((resolve, reject) => {
-          db.run(
-            `INSERT INTO users (username, role, active, passwordHash)
-             VALUES (?, ?, ?, ?)
-             ON CONFLICT(username) DO UPDATE SET
-               role     = excluded.role,
-               active   = excluded.active`,
-            [
-              u.username.trim(),
-              u.role,
-              (u.active ?? 1) ? 1 : 0,
-              '$2b$12$defaultHashForImportedUsers' // Default hash, users need to reset password
-            ],
-            function(err) {
-              if (err) reject(err);
-              else resolve(this);
-            }
-          );
-        });
-      }
-
-      // Commit if all succeeded
-      await new Promise((resolve, reject) => {
-        db.run('COMMIT', err => err ? reject(err) : resolve());
-      });
-      
-      res.json({ message: 'Users imported successfully' });
-
-    } catch (err) {
-      // Roll back on any failure
-      try {
-        await new Promise((resolve) => {
-          db.run('ROLLBACK', () => resolve());
-        });
-      } catch (_) { /* ignore rollback errors */ }
-
-      console.error('Import users error:', err);
-      res.status(500).json({ error: 'Failed to import users' });
-    }
-  }
-);
 
 // --- Role-Based Access Control ---
 router.get('/roles', async (req, res) => {

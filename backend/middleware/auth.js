@@ -69,8 +69,40 @@ function auditLog(action) {
   };
 }
 
+/**
+ * Basic CSRF protection for state-changing operations
+ * Checks that the request has a valid Origin or Referer header
+ */
+function csrfProtection(req, res, next) {
+  // Skip CSRF check for GET requests
+  if (req.method === 'GET') {
+    return next();
+  }
+
+  const origin = req.headers.origin;
+  const referer = req.headers.referer;
+  const host = req.headers.host;
+
+  // In development, allow requests without CSRF checks
+  if (process.env.NODE_ENV === 'development') {
+    return next();
+  }
+
+  // Check if request is from same origin
+  if (origin && origin.includes(host)) {
+    return next();
+  }
+
+  if (referer && referer.includes(host)) {
+    return next();
+  }
+
+  return res.status(403).json({ error: 'CSRF token validation failed' });
+}
+
 module.exports = {
   authenticateToken,
   requireRole,
-  auditLog
+  auditLog,
+  csrfProtection
 };

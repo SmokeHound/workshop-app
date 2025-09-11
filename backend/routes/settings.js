@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const db = require('../db');
-const { authenticateToken, auditLog } = require('../middleware/auth');
+const { authenticateToken, auditLog, csrfProtection } = require('../middleware/auth');
 
-// Apply authentication to all settings routes
+// Apply authentication and CSRF protection to all settings routes
 router.use(authenticateToken);
+router.use(csrfProtection);
 
 // Settings validation
 const settingsValidation = [

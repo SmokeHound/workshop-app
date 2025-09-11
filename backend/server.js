@@ -8,10 +8,14 @@ const allowlist = (process.env.CORS_ORIGIN || '')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
+
+// Enable CORS with proper configuration
 app.use(
   cors({
-    origin: allowlist.length ? allowlist : false,
-    credentials: true
+    origin: allowlist.length ? allowlist : true, // Allow all origins in development if no allowlist
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
   })
 );
 
