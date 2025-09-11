@@ -65,3 +65,17 @@ body {
 .nav-link.active i {
   color: white;
 }
+
+/* Main content positioning to account for fixed sidebar */
+.main-content {
+  margin-left: 270px;
+  padding-top: 20px;
+}
+
+/* Responsive behavior for smaller screens */
+@media (max-width: 767.98px) {
+  .main-content {
+    margin-left: 0;
+    padding-top: 60px; /* Account for mobile nav toggle */
+  }
+}
