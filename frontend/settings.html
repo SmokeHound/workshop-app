@@ -60,8 +60,15 @@
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    import { showToast } from './utils.js';
-    // Load saved settings
+    import { showToast, fetchWithAuth, requireAuth, getCurrentUser } from './utils.js';
+    import { API_BASE_URL } from '../shared/config.js';
+    
+    // Require authentication
+    if (!requireAuth()) {
+      return;
+    }
+
+    // Load saved settings from backend
     const themeSelect = document.getElementById('theme');
     const apiBaseInput = document.getElementById('apiBase');
     const notificationsSelect = document.getElementById('notifications');
@@ -70,51 +77,108 @@
     const accessibilitySelect = document.getElementById('accessibility');
     const resultEl = document.getElementById('settings-result');
 
-    themeSelect.value = localStorage.getItem('siteTheme') || 'light';
-    apiBaseInput.value = localStorage.getItem('API_BASE') || '';
-    notificationsSelect.value = localStorage.getItem('notifications') || 'on';
-    defaultPageSelect.value = localStorage.getItem('defaultPage') || 'index.html';
-    fontSizeSelect.value = localStorage.getItem('fontSize') || 'medium';
-    accessibilitySelect.value = localStorage.getItem('accessibility') || 'normal';
+    let currentSettings = {};
 
-    // Save settings
-    document.getElementById('settings-form').onsubmit = e => {
+    // Load settings from backend
+    async function loadSettings() {
+      try {
+        const response = await fetchWithAuth(`${API_BASE_URL}/settings`);
+        const data = await response.json();
+        currentSettings = data;
+
+        // Update form with backend settings
+        themeSelect.value = data.theme || 'light';
+        apiBaseInput.value = data.api_base || '';
+        notificationsSelect.value = data.notifications || 'on';
+        defaultPageSelect.value = data.default_page || 'index.html';
+        fontSizeSelect.value = data.font_size || 'medium';
+        accessibilitySelect.value = data.accessibility || 'normal';
+
+        // Apply current settings
+        applySettingsImmediately();
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+        showToast('Failed to load settings', 'error');
+        
+        // Fallback to localStorage if backend fails
+        loadFromLocalStorage();
+      }
+    }
+
+    // Fallback to localStorage
+    function loadFromLocalStorage() {
+      themeSelect.value = localStorage.getItem('siteTheme') || 'light';
+      apiBaseInput.value = localStorage.getItem('API_BASE') || '';
+      notificationsSelect.value = localStorage.getItem('notifications') || 'on';
+      defaultPageSelect.value = localStorage.getItem('defaultPage') || 'index.html';
+      fontSizeSelect.value = localStorage.getItem('fontSize') || 'medium';
+      accessibilitySelect.value = localStorage.getItem('accessibility') || 'normal';
+    }
+
+    // Apply settings immediately for preview
+    function applySettingsImmediately() {
+      document.documentElement.setAttribute('data-theme', themeSelect.value);
+      document.body.style.fontSize = fontSizeSelect.value === 'small' ? '14px' : 
+                                     fontSizeSelect.value === 'large' ? '20px' : '16px';
+      if (accessibilitySelect.value === 'high-contrast') {
+        document.body.classList.add('high-contrast');
+      } else {
+        document.body.classList.remove('high-contrast');
+      }
+    }
+
+    // Save settings to backend
+    document.getElementById('settings-form').onsubmit = async (e) => {
       e.preventDefault();
-      localStorage.setItem('siteTheme', themeSelect.value);
-      localStorage.setItem('API_BASE', apiBaseInput.value.trim());
-      localStorage.setItem('notifications', notificationsSelect.value);
-      localStorage.setItem('defaultPage', defaultPageSelect.value);
-      localStorage.setItem('fontSize', fontSizeSelect.value);
-      localStorage.setItem('accessibility', accessibilitySelect.value);
-      resultEl.textContent = 'Settings saved!';
-      resultEl.style.display = 'block';
-      showToast('Settings updated.', 'success');
-      setTimeout(() => resultEl.style.display = 'none', 2000);
-      // Apply settings immediately
-      document.documentElement.setAttribute('data-theme', themeSelect.value);
-      document.body.style.fontSize = fontSizeSelect.value === 'small' ? '14px' : fontSizeSelect.value === 'large' ? '20px' : '16px';
-      if (accessibilitySelect.value === 'high-contrast') {
-        document.body.classList.add('high-contrast');
-      } else {
-        document.body.classList.remove('high-contrast');
-      }
-    };
-    // Apply theme and font size immediately
-    themeSelect.onchange = () => {
-      document.documentElement.setAttribute('data-theme', themeSelect.value);
-    };
-    fontSizeSelect.onchange = () => {
-      document.body.style.fontSize = fontSizeSelect.value === 'small' ? '14px' : fontSizeSelect.value === 'large' ? '20px' : '16px';
-    };
-    accessibilitySelect.onchange = () => {
-      if (accessibilitySelect.value === 'high-contrast') {
-        document.body.classList.add('high-contrast');
-      } else {
-        document.body.classList.remove('high-contrast');
+      
+      const settings = {
+        theme: themeSelect.value,
+        api_base: apiBaseInput.value.trim(),
+        notifications: notificationsSelect.value,
+        default_page: defaultPageSelect.value,
+        font_size: fontSizeSelect.value,
+        accessibility: accessibilitySelect.value
+      };
+
+      try {
+        const response = await fetchWithAuth(`${API_BASE_URL}/settings`, {
+          method: 'PUT',
+          body: JSON.stringify(settings)
+        });
+
+        const data = await response.json();
+        currentSettings = settings;
+
+        // Also save to localStorage as backup
+        localStorage.setItem('siteTheme', settings.theme);
+        localStorage.setItem('API_BASE', settings.api_base);
+        localStorage.setItem('notifications', settings.notifications);
+        localStorage.setItem('defaultPage', settings.default_page);
+        localStorage.setItem('fontSize', settings.font_size);
+        localStorage.setItem('accessibility', settings.accessibility);
+
+        resultEl.textContent = 'Settings saved successfully!';
+        resultEl.className = 'mt-3 alert alert-success';
+        resultEl.style.display = 'block';
+        showToast('Settings updated successfully!', 'success');
+        
+        setTimeout(() => resultEl.style.display = 'none', 3000);
+        applySettingsImmediately();
+      } catch (error) {
+        console.error('Failed to save settings:', error);
+        resultEl.textContent = 'Failed to save settings: ' + error.message;
+        resultEl.className = 'mt-3 alert alert-danger';
+        resultEl.style.display = 'block';
+        showToast('Failed to save settings', 'error');
       }
     };
 
-  // Nav loader script
+    // Apply theme and font size immediately on change for preview
+    themeSelect.onchange = applySettingsImmediately;
+    fontSizeSelect.onchange = applySettingsImmediately;
+    accessibilitySelect.onchange = applySettingsImmediately;
+
+    // Nav loader script
     async function loadNav() {
       try {
         const res = await fetch('nav.html');
@@ -122,20 +186,32 @@
           throw new Error(`Failed to load nav.html: ${res.status} ${res.statusText}`);
         }
         const html = await res.text();
-  const navPlaceholder = document.getElementById('nav-placeholder');
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = html;
-  navPlaceholder.replaceChildren(...tempDiv.childNodes);
+        const navPlaceholder = document.getElementById('nav-placeholder');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        navPlaceholder.replaceChildren(...tempDiv.childNodes);
+        
+        // Show user info in nav
+        const user = getCurrentUser();
+        const userInfo = document.querySelector('.user-info');
+        if (userInfo) {
+          userInfo.textContent = `${user.username} (${user.role})`;
+        }
       } catch (err) {
         console.error('Failed to load nav:', err);
-        showToast('Failed to load navigation.', 'danger');
+        showToast('Failed to load navigation.', 'error');
       }
     }
 
+    // Initialize
     if (document.readyState === 'loading') {
-      window.addEventListener('DOMContentLoaded', loadNav, { once: true });
+      window.addEventListener('DOMContentLoaded', () => {
+        loadNav();
+        loadSettings();
+      }, { once: true });
     } else {
       loadNav();
+      loadSettings();
     }
   </script>
 </body>

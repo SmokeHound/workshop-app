@@ -120,3 +120,97 @@ function updateGlassyEffects(theme) {
     el.style.transition = 'background-color 0.3s ease';
   });
 }
+
+// Authentication utilities
+export function getAuthToken() {
+  return localStorage.getItem('authToken');
+}
+
+export function getCurrentUser() {
+  return {
+    username: localStorage.getItem('username'),
+    role: localStorage.getItem('userRole'),
+    token: getAuthToken()
+  };
+}
+
+export function isAuthenticated() {
+  return !!getAuthToken();
+}
+
+export function hasRole(role) {
+  const userRole = localStorage.getItem('userRole');
+  return userRole === role;
+}
+
+export function logout() {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('username');
+  localStorage.removeItem('userRole');
+  window.location.href = 'login.html';
+}
+
+export function requireAuth() {
+  if (!isAuthenticated()) {
+    window.location.href = 'login.html';
+    return false;
+  }
+  return true;
+}
+
+// Authenticated fetch wrapper
+export async function fetchWithAuth(url, options = {}) {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error('No authentication token available');
+  }
+
+  const authOptions = {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  };
+
+  const response = await fetch(url, authOptions);
+  
+  if (response.status === 401 || response.status === 403) {
+    logout();
+    throw new Error('Authentication failed');
+  }
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || response.statusText);
+  }
+  
+  return response;
+}
+
+// Password validation
+export function validatePassword(password) {
+  const errors = [];
+  
+  if (password.length < 8) {
+    errors.push('Password must be at least 8 characters long');
+  }
+  
+  if (!/[a-z]/.test(password)) {
+    errors.push('Password must contain at least one lowercase letter');
+  }
+  
+  if (!/[A-Z]/.test(password)) {
+    errors.push('Password must contain at least one uppercase letter');
+  }
+  
+  if (!/\d/.test(password)) {
+    errors.push('Password must contain at least one number');
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
