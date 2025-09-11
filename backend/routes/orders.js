@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const { authMiddleware } = require('./auth');
+const { authenticateToken } = require('../middleware/auth');
 
 const rateLimit = require('express-rate-limit');
 const bulkLimiter = rateLimit({
@@ -12,7 +12,7 @@ const bulkLimiter = rateLimit({
 });
 
 // POST /api/orders/bulk
-router.post('/bulk', authMiddleware, bulkLimiter, async (req, res) => {
+router.post('/bulk', authenticateToken, bulkLimiter, async (req, res) => {
   const orders = req.body.orders;
   if (!Array.isArray(orders) || orders.length === 0 || orders.length > 500) {
     return res.status(400).json({ error: 'Invalid order list' });

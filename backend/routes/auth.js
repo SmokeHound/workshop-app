@@ -1,105 +1,206 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
 const router = express.Router();
+const db = require('../db');
+const { authenticateToken, requireRole, auditLog } = require('../middleware/auth');
 
-// Example user store (replace with DB)
-if (process.env.NODE_ENV !== 'development' && !process.env.DEV_ADMIN_PASSWORD) {
-  throw new Error('DEV_ADMIN_PASSWORD is required outside development');
-}
-const users = [
-  {
-    username: 'admin',
-    // Derive once at boot for dev; replace with DB lookups in prod.
-    passwordHash: bcrypt.hashSync(
-      process.env.DEV_ADMIN_PASSWORD || 'admin123',
-      10
-    ),
-    role: 'admin'
-  }
+/**
+ * Password validation requirements
+ */
+const passwordValidation = [
+  body('password')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number')
 ];
 
 /**
-
- * Express middleware that verifies a Bearer JWT from the Authorization header.
- *
- * Checks for a "Bearer <token>" authorization header and verifies the token using
- * process.env.JWT_SECRET. On success the decoded token payload is attached to
- * req.user and next() is called.
- *
- * Behavior:
- * - Responds 401 if the header is missing or not a Bearer token.
- * - Responds 500 with a JSON error if JWT_SECRET is not configured.
- * - Responds 403 if token verification fails.
- *
- * Side effect: sets req.user to the decoded JWT payload on successful verification.
-======
- * Express middleware that verifies a JWT from the `Authorization: Bearer <token>` header.
- *
- * If a valid token is provided, the decoded payload is attached to `req.user` and `next()` is called.
- * Responds with:
- * - 401 if the Authorization header is missing or not a Bearer token,
- * - 500 if the server is misconfigured and `JWT_SECRET` is absent,
- * - 403 if the token fails verification.
-
+ * User registration validation
  */
-function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization || '';
-  const [scheme, token] = authHeader.split(' ');
-  if (scheme !== 'Bearer' || !token) return res.sendStatus(401);
-  if (!process.env.JWT_SECRET) {
-    return res.status(500).json({ error: 'Server misconfigured: missing JWT_SECRET' });
-  }
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
-    next();
-  });
-}
+const registrationValidation = [
+  body('username')
+    .isLength({ min: 3, max: 30 })
+    .withMessage('Username must be between 3 and 30 characters')
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage('Username can only contain letters, numbers, underscores, and hyphens'),
+  ...passwordValidation,
+  body('role')
+    .optional()
+    .isIn(['admin', 'user', 'tech'])
+    .withMessage('Role must be admin, user, or tech')
+];
 
 const rateLimit = require('express-rate-limit');
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20,
+  max: 5, // Reduced from 20 for better security
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts, please try again in 15 minutes' }
 });
+
 const sensitiveLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 50,
+  max: 30, // Reduced from 50 for better security
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' }
 });
 
-// POST /api/login
+// Apply sensitiveLimiter to protected routes
+router.use(['/me', '/register', '/change-password'], sensitiveLimiter);
+// POST /api/auth/login
 router.post('/login', loginLimiter, async (req, res) => {
-
-// Apply sensitiveLimiter to all admin and user management routes
-router.use(['/me', '/users', '/users/export', '/users/import', '/users/:id', '/apikeys', '/roles', '/announcements', '/logs'], sensitiveLimiter);
   const { username, password } = req.body;
+  
   if (typeof username !== 'string' || typeof password !== 'string' || !username || !password) {
-    return res.status(400).json({ error: 'username and password are required' });
+    return res.status(400).json({ error: 'Username and password are required' });
   }
 
-  const user = users.find(u => u.username === username);
-  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+  try {
+    // Get user from database
+    const user = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM users WHERE username = ? AND active = 1', [username], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
 
-  const match = await bcrypt.compare(password, user.passwordHash);
-  if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-  const token = jwt.sign(
-    { username: user.username, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: '1h' }
-  );
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-  res.json({ user: user.username, role: user.role, token });
+    const token = jwt.sign(
+      { username: user.username, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    // Log successful login
+    db.run('INSERT INTO logs (ts, message) VALUES (?, ?)', 
+      [Date.now(), `Login successful for ${username} from ${req.ip}`]);
+
+    res.json({ 
+      user: user.username, 
+      role: user.role, 
+      token,
+      message: 'Login successful'
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
-// GET /api/me
-router.get('/me', authMiddleware, (req, res) => {
-  res.json({ username: req.user.username, role: req.user.role });
+// POST /api/auth/register (admin only)
+router.post('/register', authenticateToken, requireRole('admin'), registrationValidation, auditLog('User registration'), async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: 'Validation failed', details: errors.array() });
+  }
+
+  const { username, password, role = 'user' } = req.body;
+
+  try {
+    // Check if user already exists
+    const existingUser = await new Promise((resolve, reject) => {
+      db.get('SELECT username FROM users WHERE username = ?', [username], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ error: 'Username already exists' });
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    // Create user
+    await new Promise((resolve, reject) => {
+      db.run('INSERT INTO users (username, passwordHash, role) VALUES (?, ?, ?)', 
+        [username, passwordHash, role], function(err) {
+          if (err) reject(err);
+          else resolve(this);
+        });
+    });
+
+    res.status(201).json({ 
+      message: 'User created successfully',
+      user: { username, role }
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Failed to create user' });
+  }
+});
+
+// POST /api/auth/change-password
+router.post('/change-password', authenticateToken, passwordValidation, auditLog('Password change'), async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: 'Validation failed', details: errors.array() });
+  }
+
+  const { currentPassword, newPassword } = req.body;
+  
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Current password and new password are required' });
+  }
+
+  try {
+    // Get current user
+    const user = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM users WHERE username = ?', [req.user.username], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify current password
+    const match = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!match) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    // Hash new password
+    const newPasswordHash = await bcrypt.hash(newPassword, 12);
+
+    // Update password
+    await new Promise((resolve, reject) => {
+      db.run('UPDATE users SET passwordHash = ? WHERE username = ?', 
+        [newPasswordHash, req.user.username], function(err) {
+          if (err) reject(err);
+          else resolve(this);
+        });
+    });
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Failed to change password' });
+  }
+});
+
+// GET /api/auth/me
+router.get('/me', authenticateToken, (req, res) => {
+  res.json({ 
+    username: req.user.username, 
+    role: req.user.role 
+  });
 });
 
 module.exports = router;
-module.exports.authMiddleware = authMiddleware;
